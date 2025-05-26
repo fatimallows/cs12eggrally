@@ -2,10 +2,10 @@
   "fps": 30,
   "worldWidth": 600,
   "worldHeight": 600,
-  "eggInitHP": 10,
+  "eggInitHP": 5,
   "eggWidth": 20,
-  "eggHeight": 20,
-  "eggnemiesCount": 4,
+  "eggHeight": 50,
+  "eggnemiesCount": 5,
   "eggnemyWidth": 20,
-  "eggnemyHeight": 20
+  "eggnemyHeight": 50
 }
