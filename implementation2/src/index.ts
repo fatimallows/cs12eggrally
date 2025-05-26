@@ -133,7 +133,6 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
           model, //
           updateEgg,
           updateEggnemies,
-          updateEggWallCollision,
         //   updateCollision,
         //   updateGameOver,
         //   updateCreateNewPipePair,
@@ -146,11 +145,7 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
     Match.orElse(() => model),
   );
 
-const updateEggWallCollision = (model: Model) =>
-  EggUtils.updateInModel(model, {
-    y: Math.max(0, Math.min(model.egg.y, model.config.screenHeight - model.egg.height)),
-    x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
-  });
+
 
 const updateEgg = (model: Model) =>
   EggUtils.updateInModel(model, {
