@@ -7,8 +7,8 @@ import * as Canvas from "cs12242-mvu/src/canvas"
 const EggUtils = {
   top: (egg: Egg) => egg.y,
   bottom: (egg: Egg) => egg.y + egg.height,
-  left:  (egg: Egg) => egg.x + egg.width,
-  right:  (egg: Egg) => egg.x,
+  left:  (egg: Egg) => egg.x,
+  right:  (egg: Egg) => egg.x + egg.width,
   updateInModel: (model: Model, updates: Partial<Egg>) =>
     Model.make({
       ...model,
@@ -66,7 +66,7 @@ const initModel = pipe(
       screenHeight: 600   ,
       fps: 30,
       canvasId: "canvas",
-      velocity: 10,
+      velocity: 20,
     }),
     egg: Egg.make({
       x: 0,
@@ -103,7 +103,7 @@ const initModel = pipe(
 
 type Msg = CanvasMsg
 
-const update = (msg: Msg, model: Model) =>
+export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
   Match.value(msg).pipe(
     Match.tag("Canvas.MsgKeyDown", ({ key }) =>
       key === "w" && !model.isGameOver ?
@@ -133,6 +133,7 @@ const update = (msg: Msg, model: Model) =>
           model, //
           updateEgg,
           updateEggnemies,
+          updateEggWallCollision,
         //   updateCollision,
         //   updateGameOver,
         //   updateCreateNewPipePair,
@@ -143,14 +144,19 @@ const update = (msg: Msg, model: Model) =>
       ),
     ),
     Match.orElse(() => model),
-  )
+  );
+
+const updateEggWallCollision = (model: Model) =>
+  EggUtils.updateInModel(model, {
+    y: Math.max(0, Math.min(model.egg.y, model.config.screenHeight - model.egg.height)),
+    x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
+  });
 
 const updateEgg = (model: Model) =>
   EggUtils.updateInModel(model, {
-    y: model.egg.y + model.egg.vy,
-    x: model.egg.x + model.egg.vx,
-  })
-
+    y: Math.max(0, Math.min(model.egg.y, model.config.screenHeight - model.egg.height)),
+    x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
+  });
 
 const eggnemySpeed = 2;
 
@@ -174,13 +180,11 @@ const updateEggnemies = (model: Model): Model =>
     }
   )
 
-
 const updateTicks = (model: Model) =>
   Model.make({
     ...model,
     ticks: model.ticks + 1,
-  })
-
+  });
 const view = (model: Model) =>
   pipe(
     model, //
@@ -248,6 +252,8 @@ startModelCmd(
     view,
   ),
 )
+
+
 
 // const EggUtils = {
 //   top: (egg: Egg) => egg.y + egg.height ,
