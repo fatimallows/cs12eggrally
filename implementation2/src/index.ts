@@ -208,7 +208,7 @@ const updateTicks = (model: Model) =>
 
 const updateGameOver = (model: Model) => {
   const egg = model.egg;
-  const isGameOver = egg.hp <= 0;
+  const isGameOver = egg.hp <= 0 || model.eggnemies.length === 0
 
   if (isGameOver) {
     return Model.make({
@@ -232,6 +232,7 @@ const updateAttack = (model: Model): Model => {
   });
 
 }
+
 export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
   Match.value(msg).pipe(
     Match.tag("Canvas.MsgKeyDown", ({ key }) => {
@@ -325,7 +326,7 @@ const viewGameOver = (model: Model) =>
     Canvas.Text.make({
       x: model.config.screenWidth / 2,
       y: model.config.screenHeight / 2,
-      text: "GAME OVER",
+      text: Array.length(model.eggnemies) === 0? "YOU WIN": "GAME OVER",
       color: "white",
       fontSize: 20,
     })
