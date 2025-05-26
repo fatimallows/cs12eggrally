@@ -11,7 +11,6 @@ const Rectangle = S.Struct({
   width: S.Number,
 })
 
-
 const EggUtils = {
   top: (egg: Egg) => egg.y,
   bottom: (egg: Egg) => egg.y + egg.height,
@@ -27,7 +26,6 @@ const EggUtils = {
     }),
 }
 
-// Configuration schema for game settings
 type Config = typeof Config.Type
 const Config = S.Struct({
   screenWidth: S.Number,
@@ -39,7 +37,6 @@ const Config = S.Struct({
   eggInvincibilityFrames: S.Int,
 })
 
-// Egg (player) schema
 type Egg = typeof Egg.Type
 const Egg = S.Struct({
   x: S.Number,
@@ -51,7 +48,6 @@ const Egg = S.Struct({
   hp: S.Number,
 })
 
-// Eggnemies (enemies) schema
 type Eggnemies = typeof Eggnemies.Type
 const Eggnemies = S.Struct({
   x: S.Number,
@@ -63,7 +59,6 @@ const Eggnemies = S.Struct({
   id: S.Number,
 })
 
-// Main Model schema for the game state
 type Model = typeof Model.Type
 const Model = S.Struct({
   config: Config,
@@ -75,7 +70,6 @@ const Model = S.Struct({
   firstCollisionTick: S.Int,
 })
 
-// Settings schema to be loaded from settings.json
 type Settings = typeof Settings.Type
 const Settings = S.Struct({
   fps: S.Number,
@@ -87,18 +81,13 @@ const Settings = S.Struct({
   eggnemiesCount: S.Number,
   eggnemyWidth: S.Number,
   eggnemyHeight: S.Number,
-  // Note: firstCollisionTick in Settings here seems redundant as it's part of Model init.
-  // If it's meant to configure the initial invincibility, perhaps rename it.
-  firstCollisionTick: S.Int,
 })
 
-// Fetch settings from JSON and start the game
 fetch("settings.json")
   .then((response) => response.json())
   .then((data: Settings) => {
     const settings = data
 
-    // Initial game model creation
     const initModel = pipe(
       Model.make({
         config: Config.make({
@@ -108,7 +97,7 @@ fetch("settings.json")
           canvasId: "canvas",
           velocity: 10,
           maxHp: settings.eggInitHP,
-          eggInvincibilityFrames: 30, // Default invincibility frames
+          eggInvincibilityFrames: 30,
         }),
         egg: Egg.make({
           x: 0,
@@ -135,7 +124,7 @@ fetch("settings.json")
         isGameOver: false,
         score: 0,
         ticks: 0,
-        firstCollisionTick: -30, // invincibility
+        firstCollisionTick: -30,
       }),
       (model) =>
         EggUtils.updateInModel(model, {
@@ -146,7 +135,6 @@ fetch("settings.json")
 
     type Msg = CanvasMsg
 
-    // Helper for collision detection between two rectangles
     const isinCollision = (rect1: Rectangle, rect2: Rectangle) => {
       return (
         rect1.x < rect2.x + rect2.width &&
@@ -168,8 +156,8 @@ fetch("settings.json")
         for (const enemy of model.eggnemies) {
           if (isinCollision(egg, enemy)) {
             currentHp -= 1
-            firstCollisionTick = model.ticks 
-            break 
+            firstCollisionTick = model.ticks
+            break
           }
         }
       }
@@ -186,7 +174,7 @@ fetch("settings.json")
         Match.tag("Canvas.MsgKeyDown", ({ key }) => {
           if (model.isGameOver) {
             return model
-          } 
+          }
 
           let x = model.egg.x
           let y = model.egg.y
@@ -201,9 +189,9 @@ fetch("settings.json")
           } else if (key === "d") {
             x = model.egg.x + velocity
           } else if (key === "r") {
-            return initModel 
+            return initModel
           } else {
-            return model 
+            return model
           }
 
           y = Math.max(0, Math.min(y, model.config.screenHeight - model.egg.height))
@@ -211,21 +199,20 @@ fetch("settings.json")
 
           return EggUtils.updateInModel(model, { x: x, y: y })
         }),
-        
         Match.tag("Canvas.MsgTick", () =>
           model.isGameOver
             ? model
             : pipe(
-                model, 
-                updateEgg, 
-                updateEggnemies, 
-                updateCollision, 
-                updateAttack, 
-                updateGameOver, 
+                model,
+                updateEgg,
+                updateEggnemies,
+                updateCollision,
+                updateAttack,
+                updateGameOver,
                 updateTicks,
               )
         ),
-        Match.orElse(() => model) 
+        Match.orElse(() => model)
       )
 
     const updateEgg = (model: Model) =>
@@ -234,7 +221,7 @@ fetch("settings.json")
         x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
       })
 
-    const eggnemySpeed = 2 
+    const eggnemySpeed = 2
     const updateEggnemies = (model: Model): Model =>
       Model.make({
         ...model,
@@ -295,13 +282,11 @@ fetch("settings.json")
 
     const view = (model: Model) =>
       pipe(
-        model, //
+        model,
         ({ config, egg }) => [
-          // black canvas
           Canvas.Clear.make({
             color: "black",
           }),
-          // egg rectangle
           Canvas.SolidRectangle.make({
             x: egg.x,
             y: egg.y,
@@ -309,13 +294,17 @@ fetch("settings.json")
             height: egg.height,
             width: egg.width,
           }),
-          // egg hp
           Canvas.Text.make({
             x: egg.x + egg.width / 2,
             y: egg.y + egg.height + 15,
             color: "white",
             text: String(model.egg.hp) + "/" + String(model.config.maxHp),
             fontSize: 12,
+          }),
+          Canvas.CanvasImage.make({
+            x: egg.x - 22,
+            y: egg.y - 22,
+            src: "resources/poring.gif",
           }),
 
           ...model.eggnemies.map((e) =>
@@ -332,10 +321,10 @@ fetch("settings.json")
             x: config.screenWidth / 2,
             y: 50,
             text: `${model.score}`,
-            color: "white", 
+            color: "white",
             fontSize: 20,
           }),
-          
+
           viewGameOver(model),
         ]
       )
