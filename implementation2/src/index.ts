@@ -38,10 +38,22 @@ const Egg = S.Struct({
     vy: S.Number,
 })
 
+type Eggnemies = typeof Eggnemies.Type
+const Eggnemies = S.Struct({
+  x: S.Number,
+  y: S.Number,
+  height: S.Number,
+  width: S.Number,
+  vx: S.Number,
+  vy: S.Number,
+  id: S.Int,
+})
+
 type Model = typeof Model.Type
 const Model = S.Struct({
   config: Config,
   egg: Egg,
+  eggnemies: S.Array(Eggnemies),
   isGameOver: S.Boolean,
   score: S.Int,
   ticks: S.Int,
@@ -54,7 +66,7 @@ const initModel = pipe(
       screenHeight: 600   ,
       fps: 30,
       canvasId: "canvas",
-      velocity: -10,
+      velocity: 10,
     }),
     egg: Egg.make({
       x: 0,
@@ -64,6 +76,20 @@ const initModel = pipe(
       vy: 0,
       vx: 0,
     }),
+    eggnemies: pipe(
+      [1, 2, 3, 4],
+      Array.map((id) =>
+        Eggnemies.make({
+          x: Math.random() * 600,
+          y: Math.random() * 600,
+          width: 20,
+          height: 20,
+          vx: Math.random() * 2 - 1, 
+          vy: Math.random() * 2 - 1, 
+          id,
+        }),
+      ),
+    ),
     isGameOver: false,
     score: 0,
     ticks: 0,
@@ -82,21 +108,21 @@ const update = (msg: Msg, model: Model) =>
     Match.tag("Canvas.MsgKeyDown", ({ key }) =>
       key === "w" && !model.isGameOver ?
         EggUtils.updateInModel(model, {
-            y: model.egg.y + model.config.velocity,
+            y: model.egg.y - model.config.velocity,
           })
     : key === "s" && !model.isGameOver ?
 
           EggUtils.updateInModel(model, {
-            y: model.egg.y - model.config.velocity,
+            y: model.egg.y + model.config.velocity,
           })
 
     : key === "a" && !model.isGameOver ?
         EggUtils.updateInModel(model, {
-            x: model.egg.x + model.config.velocity,
+            x: model.egg.x - model.config.velocity,
           })
     : key === "d" && !model.isGameOver ?
         EggUtils.updateInModel(model, {
-            x: model.egg.x - model.config.velocity,
+            x: model.egg.x + model.config.velocity,
           })
     : key === "r" ? initModel
     : model,
@@ -106,6 +132,7 @@ const update = (msg: Msg, model: Model) =>
         pipe(
           model, //
           updateEgg,
+          updateEggnemies,
         //   updateCollision,
         //   updateGameOver,
         //   updateCreateNewPipePair,
@@ -118,16 +145,40 @@ const update = (msg: Msg, model: Model) =>
     Match.orElse(() => model),
   )
 
-const updateTicks = (model: Model) =>
-  Model.make({
-    ...model,
-    ticks: model.ticks + 1,
-  })
-
 const updateEgg = (model: Model) =>
   EggUtils.updateInModel(model, {
     y: model.egg.y + model.egg.vy,
     x: model.egg.x + model.egg.vx,
+  })
+
+
+const eggnemySpeed = 2;
+
+const updateEggnemies = (model: Model): Model =>
+  Model.make({
+    ...model,
+    eggnemies: model.eggnemies.map(e => {
+      const dx = model.egg.x - e.x;
+      const dy = model.egg.y - e.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const vx = (dx / distance) * eggnemySpeed;
+      const vy = (dy / distance) * eggnemySpeed;
+      
+      return Eggnemies.make({
+        ...e,
+        x: e.x + vx,
+        y: e.y + vy,
+      })
+      })
+    }
+  )
+
+
+const updateTicks = (model: Model) =>
+  Model.make({
+    ...model,
+    ticks: model.ticks + 1,
   })
 
 const view = (model: Model) =>
@@ -149,6 +200,16 @@ const view = (model: Model) =>
         y: egg.y - 22,
         src: "resources/poring.gif",
       }),
+
+      ...model.eggnemies.map(e =>
+        Canvas.SolidRectangle.make({
+          x: e.x,
+          y: e.y,
+          color: "gray",
+          height: e.height,
+          width: e.width,
+        }),
+      ),
 
       Canvas.Text.make({
         x: config.screenWidth / 2,
