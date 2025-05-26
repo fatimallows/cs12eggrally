@@ -7,8 +7,8 @@ import * as Canvas from "cs12242-mvu/src/canvas"
 const EggUtils = {
   top: (egg: Egg) => egg.y,
   bottom: (egg: Egg) => egg.y + egg.height,
-  left:  (egg: Egg) => egg.x + egg.width,
-  right:  (egg: Egg) => egg.x,
+  left:  (egg: Egg) => egg.x,
+  right:  (egg: Egg) => egg.x + egg.width,
   updateInModel: (model: Model, updates: Partial<Egg>) =>
     Model.make({
       ...model,
@@ -54,7 +54,7 @@ const initModel = pipe(
       screenHeight: 600   ,
       fps: 30,
       canvasId: "canvas",
-      velocity: -10,
+      velocity: -20,
     }),
     egg: Egg.make({
       x: 0,
@@ -105,7 +105,7 @@ const update = (msg: Msg, model: Model) =>
       model.isGameOver ? model : (
         pipe(
           model, //
-          updateEgg,
+          updateEggWallCollision,
         //   updateCollision,
         //   updateGameOver,
         //   updateCreateNewPipePair,
@@ -124,10 +124,18 @@ const updateTicks = (model: Model) =>
     ticks: model.ticks + 1,
   })
 
-const updateEgg = (model: Model) =>
+const updateEggWallCollision = (model: Model) =>
   EggUtils.updateInModel(model, {
-    y: model.egg.y + model.egg.vy,
-    x: model.egg.x + model.egg.vx,
+    y: EggUtils.top(model.egg) <= 0 ?
+      0
+      : EggUtils.bottom(model.egg) >= config.screenHeight ?
+      config.screenHeight - model.egg.height
+      : model.egg.y,
+    x: EggUtils.left(model.egg) <= 0  ?
+      0
+      : EggUtils.right(model.egg) >= config.screenWidth ?
+      config.screenWidth - model.egg.width
+      : model.egg.x 
   })
 
 const view = (model: Model) =>
@@ -143,11 +151,6 @@ const view = (model: Model) =>
         color: "white",
         height: egg.height,
         width: egg.width
-      }),
-      Canvas.CanvasImage.make({
-        x: egg.x - 22,
-        y: egg.y - 22,
-        src: "resources/poring.gif",
       }),
 
       Canvas.Text.make({
@@ -187,6 +190,7 @@ startModelCmd(
     view,
   ),
 )
+
 
 // const EggUtils = {
 //   top: (egg: Egg) => egg.y + egg.height ,
