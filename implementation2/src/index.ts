@@ -3,11 +3,12 @@ import { Cmd, startModelCmd } from "cs12242-mvu/src/index"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 
+
 const EggUtils = {
-  top: (egg: Egg) => egg.y - egg.radius,
-  bottom: (egg: Egg) => egg.y + egg.radius,
-  left:  (egg: Egg) => egg.x - egg.radius,
-  right:  (egg: Egg) => egg.x + egg.radius,
+  top: (egg: Egg) => egg.y,
+  bottom: (egg: Egg) => egg.y + egg.height,
+  left:  (egg: Egg) => egg.x + egg.width,
+  right:  (egg: Egg) => egg.x,
   updateInModel: (model: Model, updates: Partial<Egg>) =>
     Model.make({
       ...model,
@@ -31,7 +32,8 @@ type Egg =  typeof Egg.Type
 const Egg = S.Struct({
     x: S.Number,
     y: S.Number,
-    radius: S.Number,
+    height: S.Number,
+    width: S.Number,
     vx: S.Number,
     vy: S.Number,
 })
@@ -57,7 +59,8 @@ const initModel = pipe(
     egg: Egg.make({
       x: 0,
       y: 0,
-      radius: 20,
+      width: 20,
+      height: 20,
       vy: 0,
       vx: 0,
     }),
@@ -134,11 +137,12 @@ const view = (model: Model) =>
       Canvas.Clear.make({
         color: "black",
       }),
-      Canvas.SolidCircle.make({
+      Canvas.SolidRectangle.make({
         x: egg.x,
         y: egg.y,
         color: "white",
-        radius: egg.radius,
+        height: egg.height,
+        width: egg.width
       }),
       Canvas.CanvasImage.make({
         x: egg.x - 22,
