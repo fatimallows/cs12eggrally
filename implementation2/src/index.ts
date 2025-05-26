@@ -25,6 +25,7 @@ const Config = S.Struct({ // game window (?)
   fps: S.Int,
   canvasId: S.String,
   velocity: S.Number,
+  maxHp: S.Number
 })
 type Config = typeof Config.Type
 
@@ -36,6 +37,7 @@ const Egg = S.Struct({
     width: S.Number,
     vx: S.Number,
     vy: S.Number,
+    hp: S.Number,
 })
 
 type Eggnemies = typeof Eggnemies.Type
@@ -67,6 +69,7 @@ const initModel = pipe(
       fps: 30,
       canvasId: "canvas",
       velocity: 20,
+      maxHp: 15,
     }),
     egg: Egg.make({
       x: 0,
@@ -75,6 +78,7 @@ const initModel = pipe(
       height: 20,
       vy: 0,
       vx: 0,
+      hp: 15
     }),
     eggnemies: pipe(
       [1, 2, 3, 4],
@@ -105,28 +109,32 @@ type Msg = CanvasMsg
 
 export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
   Match.value(msg).pipe(
-    Match.tag("Canvas.MsgKeyDown", ({ key }) =>
-      key === "w" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            y: model.egg.y - model.config.velocity,
-          })
-    : key === "s" && !model.isGameOver ?
+    Match.tag("Canvas.MsgKeyDown", ({ key }) => {
+      if (model.isGameOver) {return model};
 
-          EggUtils.updateInModel(model, {
-            y: model.egg.y + model.config.velocity,
-          })
+      let x = model.egg.x;
+      let y = model.egg.y;
+      const velocity = model.config.velocity;
 
-    : key === "a" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            x: model.egg.x - model.config.velocity,
-          })
-    : key === "d" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            x: model.egg.x + model.config.velocity,
-          })
-    : key === "r" ? initModel
-    : model,
-    ),
+      if (key === "s") {
+        y = model.egg.y + velocity; 
+      } else if (key === "w") {
+        y = model.egg.y - velocity;
+      } else if (key === "a") {
+        x = model.egg.x - velocity; 
+      } else if (key === "d") {
+        x = model.egg.x + velocity; 
+      } else if (key === "r") {
+        return initModel
+      } else {
+        return model
+      }
+
+      y = Math.max(0, Math.min(y, model.config.screenHeight - model.egg.height));
+      x = Math.max(0, Math.min(x, model.config.screenWidth - model.egg.width));
+
+      return EggUtils.updateInModel(model, { x: x, y: y });
+    }),
     Match.tag("Canvas.MsgTick", () =>
       model.isGameOver ? model : (
         pipe(
@@ -144,8 +152,6 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
     ),
     Match.orElse(() => model),
   );
-
-
 
 const updateEgg = (model: Model) =>
   EggUtils.updateInModel(model, {
@@ -192,6 +198,13 @@ const view = (model: Model) =>
         color: "white",
         height: egg.height,
         width: egg.width
+      }),
+      Canvas.Text.make({
+        x: egg.x + egg.width / 2,
+        y: egg.y + egg.height + 15,
+        color: "white",
+        text: String(model.egg.hp) +"/" + String(model.config.maxHp),
+        fontSize: 12,
       }),
       Canvas.CanvasImage.make({
         x: egg.x - 22,
