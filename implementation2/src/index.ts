@@ -3,6 +3,13 @@ import { Cmd, startModelCmd } from "cs12242-mvu/src/index"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 import { set } from "effect/HashMap"
+type Rectangle = typeof Rectangle.Type
+const Rectangle = S.Struct({
+  x: S.Number,
+  y: S.Number,
+  height: S.Number,
+  width: S.Number,
+})
 
 const EggUtils = {
   top: (egg: Egg) => egg.y,
@@ -19,26 +26,30 @@ const EggUtils = {
     }),
 } 
 
+
 type Config = typeof Config.Type
-const Config = S.Struct({ // game window (?)
+const Config = S.Struct({ 
   screenWidth: S.Number,
   screenHeight: S.Number,
   fps: S.Number,
   canvasId: S.String,
   velocity: S.Number,
   maxHp: S.Number,
+  eggInvincibilityFrames: S.Int, 
 })
 
-type Egg =  typeof Egg.Type
+
+type Egg = typeof Egg.Type
 const Egg = S.Struct({
-    x: S.Number,
-    y: S.Number,
-    height: S.Number,
-    width: S.Number,
-    vx: S.Number,
-    vy: S.Number,
-    hp: S.Number,
+  x: S.Number,
+  y: S.Number,
+  height: S.Number,
+  width: S.Number,
+  vx: S.Number,
+  vy: S.Number,
+  hp: S.Number,
 })
+
 
 type Eggnemies = typeof Eggnemies.Type
 const Eggnemies = S.Struct({
@@ -59,6 +70,7 @@ const Model = S.Struct({
   isGameOver: S.Boolean,
   score: S.Number,
   ticks: S.Number,
+  firstCollisionTick: S.Int, 
 })
 
 type Settings = typeof Settings.Type
@@ -72,6 +84,7 @@ const Settings = S.Struct({
   eggnemiesCount: S.Number,
   eggnemyWidth: S.Number,
   eggnemyHeight: S.Number,
+  firstCollisionTick: S.Int, 
 })
 
 fetch("settings.json").then((response) => response.json())
@@ -87,6 +100,7 @@ fetch("settings.json").then((response) => response.json())
           canvasId: "canvas",
           velocity: 10,
           maxHp: settings.eggInitHP,
+          eggInvincibilityFrames: 30,
         }),
         egg: Egg.make({
           x: 0,
@@ -113,6 +127,7 @@ fetch("settings.json").then((response) => response.json())
         isGameOver: false,
         score: 0,
         ticks: 0,
+        firstCollisionTick: -30,
       }),
       (model) =>
         EggUtils.updateInModel(model, {
@@ -122,6 +137,43 @@ fetch("settings.json").then((response) => response.json())
     )
 
     type Msg = CanvasMsg
+
+    const isinCollision = (rect1: Rectangle, rect2: Rectangle) => {
+      return (
+        rect1.x < rect2.x + rect2.width &&
+        rect1.x + rect1.width > rect2.x &&
+        rect1.y < rect2.y + rect2.height &&
+        rect1.y + rect1.height > rect2.y
+      );
+    }
+
+    const updateCollision = (model: Model): Model => {
+      const egg = model.egg;
+      let Hp = model.egg.hp;
+      let firstCollisionTick = model.firstCollisionTick;
+      const invincibilityDuration = model.config.eggInvincibilityFrames; 
+
+
+      const canTakeDamage = model.ticks - firstCollisionTick >= invincibilityDuration;
+
+      if (canTakeDamage) {
+        for (const enemy of model.eggnemies) {
+          if (isinCollision(egg, enemy)) {
+            Hp -= 1; 
+            firstCollisionTick = model.ticks; 
+            break; 
+          }
+        }
+      }
+
+
+      return Model.make({
+        ...model,
+        egg: Egg.make({ ...model.egg, hp: Hp }),
+        firstCollisionTick: firstCollisionTick,
+      });
+    }
+
 
     const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
       Match.value(msg).pipe(
@@ -175,31 +227,68 @@ fetch("settings.json").then((response) => response.json())
         x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
       });
 
-    const eggnemySpeed = 2;
-    const updateEggnemies = (model: Model): Model =>
-      Model.make({
-        ...model,
-        eggnemies: model.eggnemies.map(e => {
-          const dx = model.egg.x - e.x;
-          const dy = model.egg.y - e.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
+const eggnemySpeed = 2;
+const updateEggnemies = (model: Model): Model =>
+  Model.make({
+    ...model,
+    eggnemies: model.eggnemies.map(e => {
 
-          const vx = (dx / distance) * eggnemySpeed;
-          const vy = (dy / distance) * eggnemySpeed;
-          
-          return Eggnemies.make({
-            ...e,
-            x: e.x + vx,
-            y: e.y + vy,
-          })
-        })
-      });
+      if (model.isGameOver) {
+        return e;
+      }
+
+      const dx = model.egg.x - e.x;
+      const dy = model.egg.y - e.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const normalizedDx = distance === 0 ? 0 : dx / distance;
+      const normalizedDy = distance === 0 ? 0 : dy / distance;
+
+      const vx = normalizedDx * eggnemySpeed;
+      const vy = normalizedDy * eggnemySpeed;
+
+      return Eggnemies.make({
+        ...e,
+        x: e.x + vx,
+        y: e.y + vy,
+      })
+    })
+  }
+  )
 
     const updateTicks = (model: Model) =>
       Model.make({
         ...model,
         ticks: model.ticks + 1,
       });
+
+    const updateGameOver = (model: Model) => {
+  const egg = model.egg;
+  const isGameOver = egg.hp <= 0;
+
+  if (isGameOver) {
+    return Model.make({
+      ...model,
+      isGameOver: true,
+    });
+  }
+
+  return model;
+}
+
+const updateAttack = (model: Model): Model => {
+  if (model.isGameOver) { return model }
+
+  const egg = model.egg;
+  const eggnemies = model.eggnemies.filter(eggnemy => (!isinCollision(egg, eggnemy)))
+  
+  return Model.make({
+    ...model,
+    eggnemies: eggnemies,
+  });
+
+}
+
     const view = (model: Model) =>
       pipe(
         model, //
@@ -251,8 +340,8 @@ fetch("settings.json").then((response) => response.json())
     const viewGameOver = (model: Model) =>
       model.isGameOver ?
         Canvas.Text.make({
-          x: config.screenWidth / 2,
-          y: config.screenHeight / 2,
+          x: model.config.screenWidth / 2,
+          y: model.config.screenHeight / 2,
           text: "GAME OVER",
           color: "black",
           fontSize: 20,
