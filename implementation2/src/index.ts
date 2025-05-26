@@ -90,9 +90,9 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
         y = model.egg.y + velocity; 
       } else if (key === "s") {
         y = model.egg.y - velocity;
-      } else if (key === "a") {
-        x = model.egg.x - velocity; 
       } else if (key === "d") {
+        x = model.egg.x - velocity; 
+      } else if (key === "a") {
         x = model.egg.x + velocity; 
       } else if (key === "r") {
         return initModel
