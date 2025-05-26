@@ -77,66 +77,58 @@ const initModel = pipe(
 
 type Msg = CanvasMsg
 
-const update = (msg: Msg, model: Model) =>
+export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
   Match.value(msg).pipe(
-    Match.tag("Canvas.MsgKeyDown", ({ key }) =>
-      key === "w" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            y: model.egg.y + model.config.velocity,
-          })
-    : key === "s" && !model.isGameOver ?
+    Match.tag("Canvas.MsgKeyDown", ({ key }) => {
+      if (model.isGameOver) {return model};
 
-          EggUtils.updateInModel(model, {
-            y: model.egg.y - model.config.velocity,
-          })
+      let x = model.egg.x;
+      let y = model.egg.y;
+      const velocity = model.config.velocity;
 
-    : key === "a" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            x: model.egg.x + model.config.velocity,
-          })
-    : key === "d" && !model.isGameOver ?
-        EggUtils.updateInModel(model, {
-            x: model.egg.x - model.config.velocity,
-          })
-    : key === "r" ? initModel
-    : model,
-    ),
+      if (key === "w") {
+        y = model.egg.y + velocity; 
+      } else if (key === "s") {
+        y = model.egg.y - velocity;
+      } else if (key === "a") {
+        x = model.egg.x - velocity; 
+      } else if (key === "d") {
+        x = model.egg.x + velocity; 
+      } else if (key === "r") {
+        return initModel
+      } else {
+        return model
+      }
+
+      y = Math.max(0, Math.min(y, model.config.screenHeight - model.egg.height));
+      x = Math.max(0, Math.min(x, model.config.screenWidth - model.egg.width));
+
+      return EggUtils.updateInModel(model, { x: x, y: y });
+    }),
+
     Match.tag("Canvas.MsgTick", () =>
-      model.isGameOver ? model : (
-        pipe(
-          model, //
-          updateEggWallCollision,
-        //   updateCollision,
-        //   updateGameOver,
-        //   updateCreateNewPipePair,
-        //   updatePipePairs,
-        //   updateScore,
-          updateTicks,
-        )
-      ),
+      model.isGameOver
+        ? model
+        : pipe(
+            model,
+            updateEggWallCollision,
+            updateTicks,
+          ),
     ),
     Match.orElse(() => model),
-  )
+  );
 
 const updateTicks = (model: Model) =>
   Model.make({
     ...model,
     ticks: model.ticks + 1,
-  })
+  });
 
 const updateEggWallCollision = (model: Model) =>
   EggUtils.updateInModel(model, {
-    y: EggUtils.top(model.egg) <= 0 ?
-      0
-      : EggUtils.bottom(model.egg) >= config.screenHeight ?
-      config.screenHeight - model.egg.height
-      : model.egg.y,
-    x: EggUtils.left(model.egg) <= 0  ?
-      0
-      : EggUtils.right(model.egg) >= config.screenWidth ?
-      config.screenWidth - model.egg.width
-      : model.egg.x 
-  })
+    y: Math.max(0, Math.min(model.egg.y, model.config.screenHeight - model.egg.height)),
+    x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
+  });
 
 const view = (model: Model) =>
   pipe(
@@ -190,6 +182,7 @@ startModelCmd(
     view,
   ),
 )
+
 
 
 // const EggUtils = {
