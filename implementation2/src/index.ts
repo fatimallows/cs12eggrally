@@ -220,6 +220,18 @@ const updateGameOver = (model: Model) => {
   return model;
 }
 
+const updateAttack = (model: Model): Model => {
+  if (model.isGameOver) { return model }
+
+  const egg = model.egg;
+  const eggnemies = model.eggnemies.filter(eggnemy => (!isinCollision(egg, eggnemy)))
+  
+  return Model.make({
+    ...model,
+    eggnemies: eggnemies,
+  });
+
+}
 export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd<Msg> } =>
   Match.value(msg).pipe(
     Match.tag("Canvas.MsgKeyDown", ({ key }) => {
@@ -237,6 +249,8 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
         x = model.egg.x - velocity;
       } else if (key === "d") {
         x = model.egg.x + velocity;
+      } else if (key === "l") {
+        return updateAttack(model)
       } else if (key === "r") {
         return initModel
       } else {
@@ -255,8 +269,6 @@ export const update = (msg: Msg, model: Model): Model | { model: Model, cmd: Cmd
           updateEggnemies, 
           updateCollision, 
           updateGameOver,
-          // updatePipePairs,
-          // updateScore,
           updateTicks, 
         )
       ),
