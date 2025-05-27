@@ -128,8 +128,8 @@ fetch("settings.json")
         eggnemies: pipe(
           Array.range(1, settings.eggnemiesCount).map((id) =>
             Eggnemies.make({
-              x: Math.random() * settings.screenWidth,
-              y: Math.random() * settings.screenHeight,
+              x: Math.random() * settings.worldWidth,
+              y: Math.random() * settings.worldHeight,
               width: settings.eggnemyWidth,
               height: settings.eggnemyHeight,
               vx: Math.random() * 2 - 1,
