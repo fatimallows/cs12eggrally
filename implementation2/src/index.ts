@@ -172,9 +172,6 @@ fetch("settings.json")
     const update = (msg: Msg, model: Model): Model | { model: Model; cmd: Cmd<Msg> } =>
       Match.value(msg).pipe(
         Match.tag("Canvas.MsgKeyDown", ({ key }) => {
-          if (model.isGameOver) {
-            return model
-          }
 
           let x = model.egg.x
           let y = model.egg.y
