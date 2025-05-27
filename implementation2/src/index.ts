@@ -188,6 +188,8 @@ fetch("settings.json")
             x = model.egg.x - velocity
           } else if (key === "d") {
             x = model.egg.x + velocity
+          } else if (key === "l") {
+            return attack(model)
           } else if (key === "r") {
             return initModel
           } else {
@@ -207,7 +209,6 @@ fetch("settings.json")
                 updateEgg,
                 updateEggnemies,
                 updateCollision,
-                updateAttack,
                 updateGameOver,
                 updateTicks,
               )
@@ -266,7 +267,7 @@ const updateGameOver = (model: Model) => {
       return model
     }
 
-    const updateAttack = (model: Model): Model => {
+    const attack = (model: Model): Model => {
       if (model.isGameOver) {
         return model
       }
