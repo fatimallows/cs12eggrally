@@ -80,8 +80,18 @@ class Rectangle():
         return self.x + self.width
     
 
+@dataclass(frozen=True)
+class EggnemyConfig(ABC):
+    width: float
+    height: float
+    movement_speed: float
+    base_health: float
+    base_damage: float
+    fps: int
+
+
 @dataclass(frozen = True)
-class EntityConfig():
+class EntityConfig(EggnemyConfig):
     x: float
     y: float
     width: float
@@ -93,14 +103,7 @@ class EntityConfig():
     model_width: int
     model_height: int
     
-@dataclass(frozen=True)
-class EggnemyConfig(Protocol):
-    width: float
-    height: float
-    movement_speed: float
-    base_health: float
-    base_damage: float
-    fps: int
+
     
 
 class HitboxfulObject(Protocol):
@@ -166,7 +169,7 @@ class Entity(ABC):
             Vector: A position vector that embeds distance and magnitude to another object
         """
         # delta y
-        if other.bottom > self.top:
+        if self.top > other.bottom:
             delta_y: float = other.bottom - self.top
         elif other.top > self.bottom:
             delta_y = other.top - self.bottom
@@ -280,7 +283,10 @@ class EggnemyEntity(Entity):
             target.take_damage(self)
             
     def move(self, vector_to_egg: Vector) -> None:
-        direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
+        try:
+            direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
+        except:
+            direction_vector = Vector(0,0)
         velocity_vector: Vector = direction_vector * self.movement_speed
         self.x += velocity_vector.x_hat
         self.y += velocity_vector.y_hat
@@ -301,12 +307,12 @@ class IsKeyPressed():
     
 class Model():
     def __init__(self, 
-                 fps: int, width: int, height: int, isKeyPressed: IsKeyPressed,
+                 fps: int, width: int, height: int,
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
         self._width: int = width
         self._height: int = height
-        self._isKeyPressed: IsKeyPressed = isKeyPressed
+
         
         self.is_game_over: bool = False
         
@@ -326,9 +332,9 @@ class Model():
             ), self._egg)  for num in range(50)
         }
         
-    def update(self):
+    def update(self, is_key_pressed: IsKeyPressed):
         # this is hacky as hell
-        match(self._isKeyPressed.movement):
+        match(is_key_pressed.movement):
             #       W       S       A      D
             case((False, False, False, False) |
                  (True, True, False, False) |
@@ -337,28 +343,28 @@ class Model():
                 pass
             case((True, False, False, False) |
                  (True, False, True, True)):
-                self._egg.move(Vector(-1, 0))
+                self._egg.move(Vector(0, -1))
             case((False, True, False, False) |
                  (False, True, True, True)):
-                self._egg.move(Vector(1, 0))
+                self._egg.move(Vector(0, 1))
             case((False, False, True, False) |
                  (True, True, True, False)):
-                self._egg.move(Vector(0, -1))
+                self._egg.move(Vector(-1, 0))
             case((False, False, False, True) |
                  (True, True, False, True)):
-                self._egg.move(Vector(0, 1))
+                self._egg.move(Vector(1, 0))
             case((True, False, True, False)):
                 self._egg.move(Vector(-1, -1))
             case((True, False, False, True)):
-                self._egg.move(Vector(-1, 1))
-            case((False, True, True, False)):
                 self._egg.move(Vector(1, -1))
+            case((False, True, True, False)):
+                self._egg.move(Vector(-1, 1))
             case((False, True, False, True)):
                 self._egg.move(Vector(1, 1))
             case _:
                 raise RuntimeError("How the fuck")
         
-        if self._isKeyPressed.L:
+        if is_key_pressed.L:
             for i_num in self._eggnemies:
                 self._egg.attack_eggnemy(self._eggnemies[i_num])
         

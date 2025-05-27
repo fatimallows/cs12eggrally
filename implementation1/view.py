@@ -11,26 +11,29 @@ class View:
         pyxel.init(self._width, self._height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)
         
+    def clear_screen(self):
+        pyxel.cls(0)
+        
     def was_w_just_pressed(self):
-        return pyxel.btnp(pyxel.KEY_W)
+        return pyxel.btn(pyxel.KEY_W)
 
     def was_a_just_pressed(self):
-        return pyxel.btnp(pyxel.KEY_A)
+        return pyxel.btn(pyxel.KEY_A)
     
     def was_s_just_pressed(self):
-        return pyxel.btnp(pyxel.KEY_S)
+        return pyxel.btn(pyxel.KEY_S)
     
     def was_d_just_pressed(self):
-        return pyxel.btnp(pyxel.KEY_D)
+        return pyxel.btn(pyxel.KEY_D)
     
     def was_l_just_pressed(self):
-        return pyxel.btnp(pyxel.KEY_L)
+        return pyxel.btn(pyxel.KEY_L)
     
     def draw_egg(self, egg):
-        pyxel.rect(egg.x, egg.y, egg.width, egg.height)
+        pyxel.rect(egg.x, egg.y, egg.width, egg.height, 1)
         
     def draw_eggnemy(self, egg):
-        pyxel.rect(egg.x, egg.y, egg.width, egg.height)
+        pyxel.rect(egg.x, egg.y, egg.width, egg.height, 2)
     
  
  

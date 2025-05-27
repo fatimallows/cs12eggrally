@@ -1,19 +1,20 @@
-# from model import Model
-# from controller import Controller
-# from view import View
+from model import Model, EntityConfig, EggnemyConfig
+from controller import Controller
+from view import View
  
  
-def main():
+def main() -> None:
     width: int = 200
-    heightL: int = 200
+    height: int = 200
     fps: int = 30
  
-#     model = Model(width, height, fps)
-#     view = View(model.width, model.height)
-#     controller = Controller(model, view)
+    model = Model(fps, width, height, 10, EntityConfig(10, 10, 2, 10, 2, 10, 10, fps, width, height), 
+                  EggnemyConfig(10, 10, 0.5, 10, 10, fps))
+    view = View(width, height)
+    controller = Controller(model, view)
  
-#     controller.start()
+    controller.start()
  
  
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
