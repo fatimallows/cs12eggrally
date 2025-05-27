@@ -3,14 +3,17 @@ import { Cmd, startModelCmd } from "cs12242-mvu/src/index"
 import { CanvasMsg, canvasView } from "cs12242-mvu/src/canvas"
 import * as Canvas from "cs12242-mvu/src/canvas"
 
-type Rectangle = typeof Rectangle.Type
-const Rectangle = S.Struct({
-  x: S.Number,
-  y: S.Number,
-  height: S.Number,
-  width: S.Number,
-})
-
+const EggnemiesUtils = {
+  top: (eggnemies: Eggnemies) => eggnemies.y,
+  bottom: (eggnemies: Eggnemies) => eggnemies.y + eggnemies.height,
+  left: (eggnemies: Eggnemies) => eggnemies.x,
+  right: (eggnemies: Egg) => eggnemies.x + eggnemies.width,
+  updateInModel: (model: Model, updates: Partial<Eggnemies>[]) =>
+    Model.make({
+      ...model,
+      eggnemies: pipe(model.eggnemies, Array.map((eggnemy) => Eggnemies.make({...eggnemy, ...updates})))
+    }),
+}
 const EggUtils = {
   top: (egg: Egg) => egg.y,
   bottom: (egg: Egg) => egg.y + egg.height,
@@ -25,6 +28,14 @@ const EggUtils = {
       }),
     }),
 }
+
+type Rectangle = typeof Rectangle.Type
+const Rectangle = S.Struct({
+  x: S.Number,
+  y: S.Number,
+  height: S.Number,
+  width: S.Number,
+})
 
 type Config = typeof Config.Type
 const Config = S.Struct({
@@ -117,8 +128,8 @@ fetch("settings.json")
         eggnemies: pipe(
           Array.range(1, settings.eggnemiesCount).map((id) =>
             Eggnemies.make({
-              x: Math.random() * settings.worldWidth,
-              y: Math.random() * settings.worldHeight,
+              x: Math.random() * settings.screenWidth,
+              y: Math.random() * settings.screenHeight,
               width: settings.eggnemyWidth,
               height: settings.eggnemyHeight,
               vx: Math.random() * 2 - 1,
