@@ -30,6 +30,8 @@ type Config = typeof Config.Type
 const Config = S.Struct({
   screenWidth: S.Number,
   screenHeight: S.Number,
+  worldWidth: S.Number,
+  worldHeight: S.Number,
   fps: S.Number,
   canvasId: S.String,
   velocity: S.Number,
@@ -73,6 +75,8 @@ const Model = S.Struct({
 type Settings = typeof Settings.Type
 const Settings = S.Struct({
   fps: S.Number,
+  screenHeight: S.Number,
+  screenWidth: S.Number,
   worldWidth: S.Number,
   worldHeight: S.Number,
   eggInitHP: S.Number,
@@ -91,8 +95,10 @@ fetch("settings.json")
     const initModel = pipe(
       Model.make({
         config: Config.make({
-          screenWidth: settings.worldWidth,
-          screenHeight: settings.worldHeight,
+          screenWidth: settings.screenWidth,
+          screenHeight: settings.screenHeight,
+          worldWidth: settings.worldWidth,
+          worldHeight: settings.worldHeight,
           fps: settings.fps,
           canvasId: "canvas",
           velocity: 10,
@@ -128,8 +134,8 @@ fetch("settings.json")
       }),
       (model) =>
         EggUtils.updateInModel(model, {
-          x: model.config.screenWidth / 2,
-          y: model.config.screenHeight / 2,
+          x: model.config.worldWidth / 2,
+          y: model.config.worldHeight / 2,
         })
     )
 
@@ -198,8 +204,8 @@ fetch("settings.json")
             return initModel
           }
 
-          y = Math.max(0, Math.min(y, model.config.screenHeight - model.egg.height))
-          x = Math.max(0, Math.min(x, model.config.screenWidth - model.egg.width))
+          y = Math.max(0, Math.min(y, model.config.worldHeight - model.egg.height))
+          x = Math.max(0, Math.min(x, model.config.worldWidth - model.egg.width))
 
           return EggUtils.updateInModel(model, { x: x, y: y })
         }),
@@ -220,8 +226,8 @@ fetch("settings.json")
 
     const updateEgg = (model: Model) =>
       EggUtils.updateInModel(model, {
-        y: Math.max(0, Math.min(model.egg.y, model.config.screenHeight - model.egg.height)),
-        x: Math.max(0, Math.min(model.egg.x, model.config.screenWidth - model.egg.width)),
+        y: Math.max(0, Math.min(model.egg.y, model.config.worldHeight - model.egg.height)),
+        x: Math.max(0, Math.min(model.egg.x, model.config.worldWidth - model.egg.width)),
       })
 
     const eggnemySpeed = 2
@@ -290,6 +296,14 @@ const updateGameOver = (model: Model) => {
           Canvas.Clear.make({
             color: "black",
           }),
+          Canvas.OutlinedRectangle.make({
+            x: 0,
+            y: 0,
+            width: model.config.worldWidth,
+            height: model.config.worldHeight,
+            color: "white",
+            lineWidth: 2,
+          }),
           Canvas.SolidRectangle.make({
             x: egg.x,
             y: egg.y,
@@ -304,11 +318,11 @@ const updateGameOver = (model: Model) => {
             text: String(model.egg.hp) + "/" + String(model.config.maxHp),
             fontSize: 12,
           }),
-          Canvas.CanvasImage.make({
+         Canvas.CanvasImage.make({
             x: egg.x - 22,
             y: egg.y - 22,
             src: "resources/poring.gif",
-          }),
+          }), 
 
           ...model.eggnemies.map((e) =>
             Canvas.SolidRectangle.make({
@@ -321,7 +335,7 @@ const updateGameOver = (model: Model) => {
           ),
 
           Canvas.Text.make({
-            x: config.screenWidth / 2,
+            x: config.worldWidth / 2,
             y: 50,
             text: `${model.score}`,
             color: "white",
@@ -335,8 +349,8 @@ const updateGameOver = (model: Model) => {
 const viewGameOver = (model: Model) =>
   model.isGameOver ?
     Canvas.Text.make({
-      x: model.config.screenWidth / 2,
-      y: model.config.screenHeight / 2,
+      x: model.config.worldWidth / 2,
+      y: model.config.worldHeight / 2,
       text: Array.length(model.eggnemies) === 0? "YOU WIN": "GAME OVER",
       color: "white",
       fontSize: 20,
