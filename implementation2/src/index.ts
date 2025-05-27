@@ -176,8 +176,8 @@ fetch("settings.json")
           let x = model.egg.x
           let y = model.egg.y
           const velocity = model.config.velocity
-
-          if (key === "s") {
+          if (!model.isGameOver) {
+            if (key === "s") {
             y = model.egg.y + velocity
           } else if (key === "w") {
             y = model.egg.y - velocity
@@ -191,6 +191,11 @@ fetch("settings.json")
             return initModel
           } else {
             return model
+          }
+        }
+        
+          if (key === "r") {
+            return initModel
           }
 
           y = Math.max(0, Math.min(y, model.config.screenHeight - model.egg.height))
