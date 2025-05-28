@@ -11,14 +11,16 @@ import pyxel
 
 class Model():
     def __init__(self, 
-                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
+                 fps: int, width: int, height: int, world_width: int, world_height: int, eggnemy_entity_limit: int,
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
         self._width: int = width
         self._height: int = height
-        
+        self._world_width: int = world_width
+        self._world_height: int = world_height
         # to make sure eggnemise dont spawn so near
         min_distance = 50
+        self._elapsed_frames = 0
         
         self.is_game_over: bool = False
         
@@ -32,7 +34,7 @@ class Model():
             base_damage=egg_config.base_damage,
         )
         self._egg: EggEntity | None = EggEntity(
-            egg_config_centered, self._fps, self._width, self._height, 
+            egg_config_centered, self._fps, self._world_width, self._world_height,  # added world
             attack_radius)
         # crashing the FUCK out
         self._eggnemies: dict[int, EggnemyEntity] = {}
@@ -55,6 +57,7 @@ class Model():
             ), self._fps, self._width, self._height, self._egg)
         
     def update(self, is_key_pressed: IsKeyPressed):
+        self._elapsed_frames += 1
         # game over girl
         if self._egg is None or self._egg.is_dead:
             self._egg = None
@@ -80,6 +83,14 @@ class Model():
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
             print(self._eggnemies)
+
+    # this is for time
+    def get_elapsed_time_formatted(self) -> str:
+        total_seconds = self._elapsed_frames // self._fps
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"  # zero-padded time
+
             
             
             
