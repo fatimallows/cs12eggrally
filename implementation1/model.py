@@ -10,10 +10,13 @@ import pyxel
 
 
 class Model():
-    def __init__(self, 
+    def __init__(self, world_x: float, world_y: int,
                  fps: int, width: int, height: int, eggnemy_entity_limit: int,
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
+        # defines world border
+        self._world_x: float = world_x
+        self._world_y: float = world_y
         self._width: int = width
         self._height: int = height
         
@@ -55,31 +58,82 @@ class Model():
             ), self._fps, self._width, self._height, self._egg)
         
     def update(self, is_key_pressed: IsKeyPressed):
+        """updates the model based
+
+        Args:
+            is_key_pressed (IsKeyPressed): just takes in which keys are pressed
+        """
         # game over girl
         if self._egg is None or self._egg.is_dead:
             self._egg = None
             return
         
-        self._egg.move(Vector(
-            (-1 if is_key_pressed.movement[2] else 0) + (1 if is_key_pressed.movement[3] else 0), 
-            (-1 if is_key_pressed.movement[0] else 0) + (1 if is_key_pressed.movement[1] else 0), 
-        ))
+        # vector that would dictate how the world and enemies should move based on 
+        # user input
+        velocity_vector = Vector(
+            (1 if is_key_pressed.movement[2] else 0) + (-1 if is_key_pressed.movement[3] else 0), # x movement
+            (1 if is_key_pressed.movement[0] else 0) + (-1 if is_key_pressed.movement[1] else 0), # y movement
+        ) * self._egg._movement_speed
         
-        if is_key_pressed.L:
+        # if L is pressed on the current frame, attempt an attack on every single enemy in the game
+        # a little inefficient but whatever
+        if is_key_pressed.L: 
             for i_num in self._eggnemies:
                 self._egg.attack_eggnemy(self._eggnemies[i_num])
         
-        dead_enemies: list[int] = [] 
-        for key in self._eggnemies:
-            if self._eggnemies[key].is_dead:
-                dead_enemies.append(key)
+        # moves the world
+        cond_x: bool = self.world_right <= self._egg.left and self._egg.right <= self.world_left  
+        cond_y: bool = self._egg.top <= self._world_y + velocity_vector.y_hat and \
+                    self._world_y + velocity_vector.y_hat <=  self._egg.bottom 
+        
+        print(f"is x OOB {cond_x}\n is y OOB {cond_y}")
                 
-        for key in dead_enemies:
-            del self._eggnemies[key]
+        self._world_x += velocity_vector.x_hat
+        self._world_y += velocity_vector.y_hat
+        
+        
+        self.update_enemy_list(velocity_vector)
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
-            print(self._eggnemies)
+            # print(self._eggnemies)
+            print(self.world_top,  self.world_bottom)
+            print(self.world_left, self.world_right)
+            
+    def update_enemy_list(self, velocity_vector: Vector) -> None:
+        dead_enemies: list[int] = [] 
+        for key in self._eggnemies:
+            eggnemy = self._eggnemies[key] 
+            
+            if eggnemy.is_dead:
+                dead_enemies.append(key)
+                continue
+            
+            eggnemy.set_offset_vector(velocity_vector * eggnemy._movement_speed)
+            eggnemy.tick()
+                
+        for key in dead_enemies:
+            del self._eggnemies[key]    
+    
+    @property
+    def world_top(self) -> float:
+        return self._world_y
+    
+    @property
+    def world_bottom(self) -> float:
+        return self._world_y + self._height
+    
+    @property
+    def world_left(self) -> float:
+        return self._world_x
+    
+    @property
+    def world_right(self) -> float:
+        return self._world_x + self._width
+    
+    
+        
+        
             
             
             

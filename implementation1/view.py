@@ -42,8 +42,12 @@ class View:
         self.clear_screen()
         
         # phase 0 specs technically
+        
         if model._egg is not None:
             self.draw_egg(model._egg)
+            
+        # world border
+        self.draw_world_border(model)
             
         for eggnemy in model._eggnemies:
             self.draw_eggnemy(model._eggnemies[eggnemy])
@@ -111,6 +115,25 @@ class View:
         pyxel.text(text_x, text_y, hp_text, 7, None)  # white
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, 5)  # background: gray
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
+        
+    def draw_world_border(self, model: Model) -> None:
+        """draw function that is responsible for drawing the world border, a white line
+
+        Args:
+            model (Model): the model of the game
+        """
+        
+        line_thickness: int = 1
+        
+        # line(x1, y1, x2, y2, col)
+        # left
+        pyxel.line(model.world_left, model.world_top, model.world_left, model.world_bottom, pyxel.COLOR_WHITE)
+        # right
+        pyxel.line(model.world_right, model.world_top, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
+        # top
+        pyxel.line(model.world_left, model.world_top, model.world_right, model.world_top, pyxel.COLOR_WHITE)
+        # bottom
+        pyxel.line(model.world_left, model.world_bottom, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
     
 # class View:
 #     def __init__(self, width: int, height: int):
