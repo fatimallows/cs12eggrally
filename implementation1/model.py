@@ -6,6 +6,7 @@ from project_types import (
     EntityConfig, EggnemyConfig,
     Rectangle, IsKeyPressed, Vector,
     )
+import pyxel
 
 
 class Model():
@@ -30,7 +31,7 @@ class Model():
             base_health=egg_config.base_health,
             base_damage=egg_config.base_damage,
         )
-        self._egg: EggEntity = EggEntity(
+        self._egg: EggEntity | None = EggEntity(
             egg_config_centered, self._fps, self._width, self._height, 
             attack_radius)
         # crashing the FUCK out
@@ -55,6 +56,10 @@ class Model():
         
     def update(self, is_key_pressed: IsKeyPressed):
         # game over girl
+        if self._egg is None or self._egg.is_dead:
+            self._egg = None
+            return
+        
         if self._egg.base_health <= 0:
             self.is_game_over = True
         
@@ -71,6 +76,20 @@ class Model():
             for i_num in self._eggnemies:
                 self._egg.attack_eggnemy(self._eggnemies[i_num])
         
+        dead_enemies: list[int] = [] 
+        for key in self._eggnemies:
+            if self._eggnemies[key].is_dead:
+                dead_enemies.append(key)
+                
+        for key in dead_enemies:
+            del self._eggnemies[key]
+            
+        if pyxel.btnp(pyxel.KEY_Q):
+            # use this to check certain values lmfao
+            print(self._eggnemies)
+            
+            
+            
 
 if __name__ == "__main__":
     pass

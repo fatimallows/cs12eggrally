@@ -21,14 +21,16 @@ class Entity(ABC):
         self._model_width = width
         self._model_height = height
         
+        self._is_dead = False
+        
     @abstractmethod
     def move(self, positionVector: Vector) -> None:
         raise NotImplementedError
     
-    @abstractmethod
     def tick(self) -> None:
         """anything that requires to be done every frame is done here"""
-        raise NotImplementedError
+        if self.base_health <= 0:
+            self._is_dead = True
         
     def get_distance_vector_to(self, other: HitboxfulObject) -> Vector:
         """Simply get the x and y distance of the two objects and slap them on a vector.
@@ -134,6 +136,10 @@ class Entity(ABC):
             x_hat=(self.right - self.left),
             y_hat=(self.top - self.bottom),
         ) / 2
+        
+    @property
+    def is_dead(self) -> bool:
+        return self._is_dead
     
 
 class EggEntity(Entity):
@@ -164,6 +170,7 @@ class EggEntity(Entity):
         self.invincibility_timer -= 1 if self.invincibility_timer > 0 else 0
         
     def tick(self) -> None:
+        super().tick()
         self._tick_invincibility_timer()
     
     
@@ -188,6 +195,9 @@ class EggnemyEntity(Entity):
         self._y += velocity_vector.y_hat
         
     def tick(self) -> None:
+        super().tick()
+        if self._is_dead:
+            return
         vector_to_egg: Vector = self.get_distance_vector_to(self.target_egg)
         self.attack_egg(self.target_egg)
         self.move(vector_to_egg)

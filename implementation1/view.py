@@ -40,7 +40,7 @@ class View:
     def draw(self, model: Model) -> None:
         self.clear_screen()
         print("Drawing frame. Game over status:", model.is_game_over) 
-        if model.is_game_over:
+        if model._egg is None:
             # draw game over popup only
             box_width = 100
             box_height = 40
