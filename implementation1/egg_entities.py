@@ -163,8 +163,8 @@ class EggEntity(Entity):
         delta_x: float = direction_vector.x_hat * self._movement_speed
         delta_y: float = direction_vector.y_hat * self._movement_speed
         
-        self._x += delta_x if 0 <= self._x + delta_x <= self._model_width else 0
-        self._y += delta_y if 0 <= self._y + delta_y <= self._model_height else 0
+        self._x += delta_x if 0 <= self.left + delta_x and self.right + delta_x < self._model_width else 0
+        self._y += delta_y if 0 <= self.top + delta_y and self.bottom + delta_y < self._model_height else 0
     
     def _tick_invincibility_timer(self) -> None:
         self.invincibility_timer -= 1 if self.invincibility_timer > 0 else 0
