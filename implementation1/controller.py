@@ -26,6 +26,9 @@ class Controller:
         
         if self._model._egg is not None:
             self._model._egg.tick()
+        else:
+            return
+        
         for i_num in self._model._eggnemies:
             self._model._eggnemies[i_num].tick()
         

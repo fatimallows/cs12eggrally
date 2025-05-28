@@ -9,13 +9,14 @@ class Entity(ABC):
     All entities have a rectangle hitbox, just so we can have freedom in what
     we can use as the sprite"""
     def __init__(self, entity_config: EntityConfig, fps: int, width: int, height: int) -> None:
-        self._x = entity_config.x
-        self._y = entity_config.y
-        self._width = entity_config.width
-        self._height = entity_config.height
-        self._movement_speed = entity_config.movement_speed
-        self.base_health = entity_config.base_health
-        self.base_damage = entity_config.base_damage
+        self._x: float = entity_config.x
+        self._y: float = entity_config.y
+        self._width: float = entity_config.width # might cause bugs idk
+        self._height: float = entity_config.height
+        self._movement_speed: float = entity_config.movement_speed
+        self.base_health: float = entity_config.base_health
+        self.max_health: float = self.base_health
+        self.base_damage: float = entity_config.base_damage
         
         self._fps = fps
         self._model_width = width

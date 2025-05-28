@@ -1,4 +1,5 @@
 import pyxel
+from extract_json import json_handler
 from model import Model
 from project_types import (
     UpdateHandler, DrawHandler,
@@ -43,6 +44,7 @@ class View:
         # phase 0 specs technically
         if model._egg is not None:
             self.draw_egg(model._egg)
+            
         for eggnemy in model._eggnemies:
             self.draw_eggnemy(model._eggnemies[eggnemy])
             
@@ -87,11 +89,8 @@ class View:
         pyxel.rect(egg.x, egg.y, egg.width, egg.height, 2)
     
     def draw_hp_bar(self, egg: EggEntity) -> None:
-        max_hp = 10  # assumed max HP for scale
-
         # dimesions
-        hp_value = int(egg.base_health / (max_hp / 10))
-        hp_text = f"{hp_value}/10"
+        hp_text = f"{egg.base_health}/{egg.max_health}"
         text_width = len(hp_text) * 4 
 
         # position below the egg
@@ -102,7 +101,7 @@ class View:
         # hp bar settings based on text width
         bar_width = text_width
         bar_height = 2
-        hp_ratio = egg.base_health / max_hp
+        hp_ratio = egg.base_health / egg.max_health
         filled_width = int(bar_width * hp_ratio)
 
         

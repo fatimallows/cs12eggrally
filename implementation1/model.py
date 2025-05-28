@@ -60,13 +60,6 @@ class Model():
             self._egg = None
             return
         
-        if self._egg.base_health <= 0:
-            self.is_game_over = True
-        
-        if self.is_game_over:
-            print('G')
-            return
-        
         self._egg.move(Vector(
             (-1 if is_key_pressed.movement[2] else 0) + (1 if is_key_pressed.movement[3] else 0), 
             (-1 if is_key_pressed.movement[0] else 0) + (1 if is_key_pressed.movement[1] else 0), 
