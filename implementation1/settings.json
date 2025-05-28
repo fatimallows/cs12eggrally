@@ -2,7 +2,7 @@
     "game_fps": 30,
     "world_width": 200,
     "world_height": 300,
-    "egg_health": 100,
+    "egg_health": 10,
     "egg_width": 10,
     "egg_height": 30,
     "eggnemy_cap": 10,

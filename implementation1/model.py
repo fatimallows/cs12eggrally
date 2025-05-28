@@ -1,332 +1,21 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Protocol
 from random import random, uniform
-
-FRAMES_PER_SECOND = 30
-
-@dataclass(frozen=True)
-class Vector():
-    """This can be any vector really, position, vector, acceleration, anything"""
-    x_hat: float
-    y_hat: float
-    
-    def __add__(self, other: 'Vector') -> 'Vector':
-        return Vector(
-            self.x_hat + other.x_hat,  # changed other_y to other_x [sabog k n]
-            self.y_hat + other.y_hat,
-        )
-    
-    def __sub__(self, other: 'Vector') -> 'Vector':
-        return Vector(
-            self.x_hat - other.x_hat, # same here
-            self.y_hat - other.y_hat,
-        )
-        
-    def __mul__(self, constant: float) -> 'Vector':
-        return Vector(
-            self.x_hat * constant,
-            self.y_hat * constant,
-        )
-        
-    def __truediv__(self, constant: float) -> 'Vector':
-        return Vector(
-            self.x_hat / constant,
-            self.y_hat / constant,
-        )
-        
-    def __neg__(self) -> 'Vector':
-        return Vector(-self.x_hat, -self.y_hat)
-
-    # added equality dunder (this is a dundermethod right...)
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Vector):
-            return False
-        return self.x_hat == other.x_hat and self.y_hat == other.y_hat
-        
-    def __abs__(self) -> float:
-        return (self.x_hat ** 2 + self.y_hat ** 2) ** 0.5
-    
-    def dot_product(self, other: 'Vector') -> float:
-        return self.x_hat * other.x_hat + self.y_hat * other.y_hat
-    
-    # not the m22
-    # corrected the operation for magnitude squared
-    def project_onto(self, other: 'Vector') -> 'Vector':
-        return other * (Vector(self.x_hat, self.y_hat).dot_product(other) / (abs(other)**2))
-
-@dataclass
-class Rectangle():
-    """A class that stores a representation for what it means to be a 
-    rectangle in the game
-
-    Returns:
-        top: returns the y value of the top side of the rectangle
-        bottom: returns the y value of the bottom side of the rectangle
-        left: returns the x value of the left side of the rectangle
-        right: returns the x value of the right side of the rectangle
-    """
-    x: float
-    y: float
-    width: float
-    height: float
-    
-    @property
-    def top(self):
-        return self.y
-    
-    @property
-    def bottom(self):
-        return self.y + self.height
-    
-    @property
-    def left(self):
-        return self.x
-    
-    @property
-    def right(self):
-        return self.x + self.width
-
-    # added a .center [conveniency!!]
-    @property
-    def center(self) -> Vector:
-        return Vector(
-            x_hat=(self.left + self.right) / 2,
-            y_hat=(self.top + self.bottom) / 2
-        )
-    
-
-@dataclass(frozen=True)
-class EggnemyConfig(ABC):
-    width: float
-    height: float
-    movement_speed: float
-    base_health: float
-    base_damage: float
-    fps: int
+from egg_entities import (
+    Entity, EggEntity, EggnemyEntity
+)
+from project_types import (
+    EntityConfig, EggnemyConfig,
+    Rectangle, IsKeyPressed, Vector,
+    )
 
 
-@dataclass(frozen = True)
-class EntityConfig(EggnemyConfig):
-    x: float
-    y: float
-    width: float
-    height: float
-    movement_speed: float
-    base_health: float
-    base_damage: float
-    fps: int
-    model_width: int
-    model_height: int
-
-
-
-class HitboxfulObject(Protocol):
-    @property
-    def top(self):
-        ...
-    
-    @property
-    def bottom(self) -> float:
-        ...
-    
-    @property
-    def left(self) -> float:
-        ...
-    
-    @property
-    def right(self) -> float:
-        ...
-        
-    @property
-    def center(self) -> Vector:
-        ...
-
-
-class Entity(ABC):
-    """Entities are any objects in the game that can move around, fight, and bleed.
-    All entities have a rectangle hitbox, just so we can have freedom in what
-    we can use as the sprite"""
-    def __init__(self, entity_config: EntityConfig) -> None:
-        self.x = entity_config.x
-        self.y = entity_config.y
-        self.width = entity_config.width
-        self.height = entity_config.height
-        self.movement_speed = entity_config.movement_speed
-        self.base_health = entity_config.base_health
-        self.base_damage = entity_config.base_damage
-        self.fps = entity_config.fps
-        self.model_width = entity_config.model_width
-        self.model_height = entity_config.model_height
-        
-    @abstractmethod
-    def move(self, positionVector: Vector) -> None:
-        raise NotImplementedError
-    
-    @abstractmethod
-    def tick(self) -> None:
-        """anything that requires to be done every frame is done here
-        """
-        raise NotImplementedError
-        
-    def get_distance_vector_to(self, other: HitboxfulObject) -> Vector:
-        """Simply get the x and y distance of the two objects and slap them on a vector.
-        Let R be the object on the right
-        Let L be the object on the left
-        Let T be the top most object
-        Let B be the object on the bottom
-        <R.left - L.right, B.top - T.bottom>
-
-        Args:
-            other (HitboxfulObject): just anything with a hitbox
-
-        Returns:
-            Vector: A position vector that embeds distance and magnitude to another object
-        """
-        # delta y
-        if self.top > other.bottom:
-            delta_y: float = other.bottom - self.top
-        elif other.top > self.bottom:
-            delta_y = other.top - self.bottom
-        else:
-            delta_y = 0
-            
-        # delta x
-        if self.left > other.right:
-            delta_x: float =  other.right - self.left
-        elif other.left > self.right:
-            delta_x = other.left - self.right
-        else:
-            delta_x = 0
-            
-        return Vector(delta_x, delta_y)
-        
-    def get_distance_to(self, other: HitboxfulObject) -> float:
-        """Takes the coordinates of the other guy and calculates their distance
-
-        Args:
-            other (Entity): Whoever we are checking
-
-        Returns:
-            float: The square distance
-        """
-        
-            
-        # may have weird floating point errors
-        # if x and y gets too big, it may cause overflows
-        
-        distance_vector: Vector = self.get_distance_vector_to(other)
-        distance: float = abs(distance_vector)
-
-        return distance
-    
-    def is_in_collission(self, other: 'Entity') -> bool:
-        """Checks if it is in collission with the other entity
-
-        Args:
-            other (Entity): _description_
-
-        Returns:
-            bool: _description_
-        """
-        return self.get_distance_vector_to(other) == Vector(0, 0)
-    
-    def take_damage(self, attacker: 'Entity') -> None:
-        self.base_health -= attacker.base_damage
-    
-    @property
-    def top(self) -> float:
-        return self.y
-    
-    @property
-    def bottom(self) -> float:
-        return self.y + self.height
-    
-    @property
-    def left(self) -> float:
-        return self.x
-    
-    @property
-    def right(self) -> float:
-        return self.x + self.width
-    
-    # a little rough (this calculation will be done every single time its called lawl)
-    @property
-    def center(self) -> Vector:
-        return Vector(
-            x_hat=(self.right - self.left),
-            y_hat=(self.top - self.bottom),
-        ) / 2
-    
-
-class EggEntity(Entity):
-    def __init__(self, entity_config: EntityConfig, attack_radius: float) -> None:
-        super().__init__(entity_config)
-        self.attack_radius: float = attack_radius
-        self.invincibility_timer: float = 0
-        
-    def take_damage(self, attacker) -> None:
-        if self.invincibility_timer == 0:
-            super().take_damage(attacker)
-            self.invincibility_timer = FRAMES_PER_SECOND
-    
-    def attack_eggnemy(self, target: 'EggnemyEntity') -> None:
-        if self.get_distance_to(target) <= self.attack_radius:
-            target.take_damage(self)
-        
-    def move(self, direction_vector: Vector) -> None:
-        delta_x: float = direction_vector.x_hat * self.movement_speed
-        delta_y: float = direction_vector.y_hat * self.movement_speed
-        
-        self.x += delta_x if 0 <= self.x + delta_x <= self.model_width else 0
-        self.y += delta_y if 0 <= self.y + delta_y <= self.model_height else 0
-    
-    def _tick_invincibility_timer(self) -> None:
-        self.invincibility_timer -= 1 if self.invincibility_timer > 0 else 0
-        
-    def tick(self) -> None:
-        self._tick_invincibility_timer()
-    
-    
-class EggnemyEntity(Entity):
-    def __init__(self, entity_config: EntityConfig, target_egg: EggEntity) -> None:
-        super().__init__(entity_config)   
-        self.target_egg = target_egg
-        
-    def attack_egg(self, target: EggEntity) -> None:
-        if self.is_in_collission(target):
-            target.take_damage(self)
-            
-    def move(self, vector_to_egg: Vector) -> None:
-        try:
-            direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
-        except:
-            direction_vector = Vector(0,0)
-        velocity_vector: Vector = direction_vector * self.movement_speed
-        self.x += velocity_vector.x_hat
-        self.y += velocity_vector.y_hat
-        
-    def tick(self) -> None:
-        vector_to_egg: Vector = self.get_distance_vector_to(self.target_egg)
-        self.attack_egg(self.target_egg)
-        self.move(vector_to_egg)
-        
-        
-type Movement = tuple[bool, bool, bool, bool] # W, S, A, D 
-        
-@dataclass(frozen=True)     
-class IsKeyPressed():
-    movement: Movement
-    L: bool
-
-    
 class Model():
     def __init__(self, 
-                 fps: int, width: int, height: int,
+                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
         self._width: int = width
         self._height: int = height
+        
         # to make sure eggnemise dont spawn so near
         min_distance = 50
         
@@ -340,14 +29,14 @@ class Model():
             movement_speed=egg_config.movement_speed,
             base_health=egg_config.base_health,
             base_damage=egg_config.base_damage,
-            fps=egg_config.fps,
-            model_width=width,
-            model_height=height
         )
-        self._egg: EggEntity = EggEntity(egg_config_centered, attack_radius)
+        self._egg: EggEntity = EggEntity(
+            egg_config_centered, self._fps, self._width, self._height, 
+            attack_radius)
         # crashing the FUCK out
         self._eggnemies: dict[int, EggnemyEntity] = {}
-        for num in range(50):
+        
+        for num in range(eggnemy_entity_limit):
             while True:
                 x = uniform(0, width - eggnemy_config.width)
                 y = uniform(0, height - eggnemy_config.height)
@@ -362,10 +51,7 @@ class Model():
                 movement_speed=eggnemy_config.movement_speed,
                 base_health=eggnemy_config.base_health,
                 base_damage=eggnemy_config.base_damage,
-                fps=eggnemy_config.fps,
-                model_width=width,
-                model_height=height
-            ), self._egg)
+            ), self._fps, self._width, self._height, self._egg)
         
     def update(self, is_key_pressed: IsKeyPressed):
         # game over girl
@@ -375,37 +61,11 @@ class Model():
         if self.is_game_over:
             print('G')
             return
-        # this is hacky as hell
-        # girl *crying emoji*
-        match(is_key_pressed.movement):
-            #       W       S       A      D
-            case((False, False, False, False) |
-                 (True, True, False, False) |
-                 (False, False, True, True) |
-                 (True, True, True, True)):
-                pass
-            case((True, False, False, False) |
-                 (True, False, True, True)):
-                self._egg.move(Vector(0, -1))
-            case((False, True, False, False) |
-                 (False, True, True, True)):
-                self._egg.move(Vector(0, 1))
-            case((False, False, True, False) |
-                 (True, True, True, False)):
-                self._egg.move(Vector(-1, 0))
-            case((False, False, False, True) |
-                 (True, True, False, True)):
-                self._egg.move(Vector(1, 0))
-            case((True, False, True, False)):
-                self._egg.move(Vector(-1, -1))
-            case((True, False, False, True)):
-                self._egg.move(Vector(1, -1))
-            case((False, True, True, False)):
-                self._egg.move(Vector(-1, 1))
-            case((False, True, False, True)):
-                self._egg.move(Vector(1, 1))
-            case _:
-                raise RuntimeError("How the fuck") # LMAOO
+        
+        self._egg.move(Vector(
+            (-1 if is_key_pressed.movement[2] else 0) + (1 if is_key_pressed.movement[3] else 0), 
+            (-1 if is_key_pressed.movement[0] else 0) + (1 if is_key_pressed.movement[1] else 0), 
+        ))
         
         if is_key_pressed.L:
             for i_num in self._eggnemies:
@@ -413,23 +73,7 @@ class Model():
         
 
 if __name__ == "__main__":
-    entity_config: EntityConfig = EntityConfig(
-        x=0,
-        y=0,
-        width=10,
-        height=10,
-        movement_speed=10,
-        base_damage=100,
-        base_health=10,
-        fps=30,
-        model_width=100,
-        model_height=100,
-    )
-    
-    entity_1: Entity = EggEntity(entity_config, 2)
-    entity_2: Entity = EggEntity(entity_config, 2)
-    
-    entity_1.take_damage(entity_2)
+    pass
 
 """from __future__ import annotations
 import random

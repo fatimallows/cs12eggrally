@@ -1,37 +1,43 @@
 import pyxel
 from model import Model
+from project_types import (
+    UpdateHandler, DrawHandler,
+)
+from egg_entities import (
+    Entity, EggEntity, EggnemyEntity
+)
 # from project_types import UpdateHandler, DrawHandler, PipePairInfo, BirdInfo
 
 class View:
-    def __init__(self, width: int, height: int):
+    def __init__(self, width: int, height: int) -> None:
         self._width = width
         self._height = height
         
-    def start(self, fps: int, update_handler, draw_handler):
+    def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler) -> None:
         pyxel.init(self._width, self._height, fps=fps)
         pyxel.run(update_handler.update, draw_handler.draw)
         
-    def clear_screen(self):
+    def clear_screen(self) -> None:
         pyxel.cls(0)
         
-    def was_w_just_pressed(self):
+    def was_w_just_pressed(self) -> bool:
         return pyxel.btn(pyxel.KEY_W) 
 
-    def was_a_just_pressed(self):
+    def was_a_just_pressed(self) -> bool:
         return pyxel.btn(pyxel.KEY_A)
     
-    def was_s_just_pressed(self):
+    def was_s_just_pressed(self) -> bool:
         return pyxel.btn(pyxel.KEY_S)
     
-    def was_d_just_pressed(self):
+    def was_d_just_pressed(self) -> bool:
         return pyxel.btn(pyxel.KEY_D)
     
-    def was_l_just_pressed(self):
+    def was_l_just_pressed(self) -> bool:
         return pyxel.btn(pyxel.KEY_L)
 
     # game over draw
     # this isnt FUCKING WORKINGG
-    def draw(self, model):
+    def draw(self, model: Model) -> None:
         self.clear_screen()
         print("Drawing frame. Game over status:", model.is_game_over) 
         if model.is_game_over:
@@ -51,7 +57,7 @@ class View:
             text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
             text_y = box_y + box_height // 2 - 4  # approx vertical center
 
-            pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK)
+            pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
         else:
             # draw normal game stuff
             self.draw_egg(model._egg)
@@ -59,16 +65,16 @@ class View:
                 self.draw_eggnemy(enemy)
 
             
-    def draw_egg(self, egg):
+    def draw_egg(self, egg: EggEntity) -> None:
         pyxel.rect(egg.x, egg.y, egg.width, egg.height, 1)
 
         # HP BARRRR
         self.draw_hp_bar(egg)
         
-    def draw_eggnemy(self, egg):
+    def draw_eggnemy(self, egg: EggnemyEntity) -> None:
         pyxel.rect(egg.x, egg.y, egg.width, egg.height, 2)
     
-    def draw_hp_bar(self, egg):
+    def draw_hp_bar(self, egg: EggEntity) -> None:
         max_hp = 10  # assumed max HP for scale
 
         # dimesions
@@ -91,7 +97,7 @@ class View:
         bar_x = text_x
         bar_y = text_y + 8  # below text
 
-        pyxel.text(text_x, text_y, hp_text, 7)  # white
+        pyxel.text(text_x, text_y, hp_text, 7, None)  # white
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, 5)  # background: gray
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
     

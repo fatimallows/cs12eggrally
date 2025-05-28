@@ -1,13 +1,12 @@
 from __future__ import annotations
 import json
-from typing import Protocol
-from typing import Sequence
+from typing import Protocol, Sequence, Literal
 
 type SettingsValue = float
 type SettingsDict = dict[str, SettingsValue]
 
 class json_handler_protocol(Protocol):
-    def extract_settings(self, *settings_args: str):
+    def extract_settings(self, settings_args: Sequence[str] | Literal['all']):
         ...
         
 class json_handler():
@@ -24,7 +23,7 @@ class json_handler():
             raise ValueError("file does not exist")
 
             
-    def extract_settings(self, setting_args: Sequence[str]) -> SettingsDict:
+    def extract_settings(self, setting_args: Sequence[str] | Literal['all']) -> SettingsDict:
         """Extracts values of the settings in order of the arguements put in 
 
         Args:
@@ -36,6 +35,8 @@ class json_handler():
         Returns:
             Extract: A truncated settings dictionary based on the arguement
         """
+        if setting_args == 'all':
+            return {key: self._settings[key] for key in self._settings}
         try:
             return {key: self._settings[key] for key in setting_args}
         except KeyError:
@@ -44,7 +45,7 @@ class json_handler():
 
 
 if __name__ == "__main__":
-    _object = json_handler('settings.json')
+    _object = json_handler('implementation1/settings.json')
     try:
         print(_object.extract_settings(("game_fps", "world_width", "world_height")))
     except KeyError as e:
