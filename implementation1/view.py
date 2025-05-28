@@ -39,30 +39,42 @@ class View:
     # this isnt FUCKING WORKINGG
     def draw(self, model: Model) -> None:
         self.clear_screen()
-        print("Drawing frame. Game over status:", model.is_game_over) 
-        if model._egg is None:
-            # draw game over popup only
-            box_width = 100
-            box_height = 40
-            box_x = (self._width - box_width) // 2
-            box_y = (self._height - box_height) // 2
-
-            # draw white box
-            pyxel.rect(box_x, box_y, box_width, box_height, pyxel.COLOR_WHITE)
-            # draw black border
-            pyxel.rectb(box_x, box_y, box_width, box_height, pyxel.COLOR_BLACK)
-
-            # draw centered "GAME OVER" text inside box
-            text = "GAME OVER"
-            text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
-            text_y = box_y + box_height // 2 - 4  # approx vertical center
-
-            pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
-        else:
-            # draw normal game stuff
+        
+        # phase 0 specs technically
+        if model._egg is not None:
             self.draw_egg(model._egg)
-            for enemy in model._eggnemies.values():
-                self.draw_eggnemy(enemy)
+        for eggnemy in model._eggnemies:
+            self.draw_eggnemy(model._eggnemies[eggnemy])
+            
+            
+        # working game over screen
+        # print("Drawing frame. Game over status:", model.is_game_over) 
+        
+        # if model._egg is None:
+        #     # draw game over popup only
+        #     box_width = 100
+        #     box_height = 40
+        #     box_x = (self._width - box_width) // 2
+        #     box_y = (self._height - box_height) // 2
+
+        #     # draw white box
+        #     pyxel.rect(box_x, box_y, box_width, box_height, pyxel.COLOR_WHITE)
+        #     # draw black border
+        #     pyxel.rectb(box_x, box_y, box_width, box_height, pyxel.COLOR_BLACK)
+
+        #     # draw centered "GAME OVER" text inside box
+        #     text = "GAME OVER"
+        #     text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
+        #     text_y = box_y + box_height // 2 - 4  # approx vertical center
+
+        #     print(box_height, box_width, box_x, box_y)
+
+        #     pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
+        # else:
+        #     # draw normal game stuff
+        #     self.draw_egg(model._egg)
+        #     for enemy in model._eggnemies.values():
+        #         self.draw_eggnemy(enemy)
 
             
     def draw_egg(self, egg: EggEntity) -> None:

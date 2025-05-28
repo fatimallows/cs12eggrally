@@ -24,21 +24,15 @@ class Controller:
         self._model.update(is_key_pressed)
         
         
-        if self._model._egg is None:
-            return
-        self._model._egg.tick()
+        if self._model._egg is not None:
+            self._model._egg.tick()
         for i_num in self._model._eggnemies:
             self._model._eggnemies[i_num].tick()
         
         
         
     def draw(self):
-        self._view.clear_screen()
-        
-        if self._model._egg is not None:
-            self._view.draw_egg(self._model._egg)
-        for eggnemy in self._model._eggnemies:
-            self._view.draw_eggnemy(self._model._eggnemies[eggnemy])
+        self._view.draw(self._model)
         
  
 # Controller <: UpdateHandler
