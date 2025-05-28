@@ -82,17 +82,19 @@ class Model():
                 self._egg.attack_eggnemy(self._eggnemies[i_num])
         
         # moves the world
-        cond_x: bool = self.world_right <= self._egg.left and self._egg.right <= self.world_left  
-        cond_y: bool = self._egg.top <= self._world_y + velocity_vector.y_hat and \
-                    self._world_y + velocity_vector.y_hat <=  self._egg.bottom 
+        cond_x: bool = self.world_right + velocity_vector.x_hat >= self._egg.right and self._egg.left >= self.world_left + velocity_vector.x_hat  
+        cond_y: bool = self.world_bottom + velocity_vector.y_hat >= self._egg.bottom and self._egg.top >= self.world_top + velocity_vector.y_hat
         
         print(f"is x OOB {cond_x}\n is y OOB {cond_y}")
                 
-        self._world_x += velocity_vector.x_hat
-        self._world_y += velocity_vector.y_hat
+        self._world_x += velocity_vector.x_hat if cond_x else 0
+        self._world_y += velocity_vector.y_hat if cond_y else 0
         
         
-        self.update_enemy_list(velocity_vector)
+        self.update_enemy_list(Vector(
+            velocity_vector.x_hat if cond_x else 0,
+            velocity_vector.y_hat if cond_y else 0,
+        ))
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
