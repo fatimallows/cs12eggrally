@@ -9,7 +9,7 @@ def main() -> None:
     fps: int = 30
  
     model = Model(fps, width, height, 10, EntityConfig(10, 10, 2, 10, 2, 10, 10, fps, width, height), 
-                  EggnemyConfig(10, 10, 0.5, 10, 10, fps))
+                  EggnemyConfig(10, 10, 0.5, 10, 1, fps))
     view = View(width, height)
     controller = Controller(model, view)
  

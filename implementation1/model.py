@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Protocol
-from random import random
+from random import random, uniform
 
 FRAMES_PER_SECOND = 30
 
@@ -13,13 +13,13 @@ class Vector():
     
     def __add__(self, other: 'Vector') -> 'Vector':
         return Vector(
-            self.x_hat + other.y_hat,
+            self.x_hat + other.x_hat,  # changed other_y to other_x [sabog k n]
             self.y_hat + other.y_hat,
         )
     
     def __sub__(self, other: 'Vector') -> 'Vector':
         return Vector(
-            self.x_hat - other.y_hat,
+            self.x_hat - other.x_hat, # same here
             self.y_hat - other.y_hat,
         )
         
@@ -37,6 +37,12 @@ class Vector():
         
     def __neg__(self) -> 'Vector':
         return Vector(-self.x_hat, -self.y_hat)
+
+    # added equality dunder (this is a dundermethod right...)
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Vector):
+            return False
+        return self.x_hat == other.x_hat and self.y_hat == other.y_hat
         
     def __abs__(self) -> float:
         return (self.x_hat ** 2 + self.y_hat ** 2) ** 0.5
@@ -44,8 +50,10 @@ class Vector():
     def dot_product(self, other: 'Vector') -> float:
         return self.x_hat * other.x_hat + self.y_hat * other.y_hat
     
+    # not the m22
+    # corrected the operation for magnitude squared
     def project_onto(self, other: 'Vector') -> 'Vector':
-        return other * (Vector(self.x_hat, self.y_hat).dot_product(other) / abs(other)*2)
+        return other * (Vector(self.x_hat, self.y_hat).dot_product(other) / (abs(other)**2))
 
 @dataclass
 class Rectangle():
@@ -78,6 +86,14 @@ class Rectangle():
     @property
     def right(self):
         return self.x + self.width
+
+    # added a .center [conveniency!!]
+    @property
+    def center(self) -> Vector:
+        return Vector(
+            x_hat=(self.left + self.right) / 2,
+            y_hat=(self.top + self.bottom) / 2
+        )
     
 
 @dataclass(frozen=True)
@@ -102,9 +118,8 @@ class EntityConfig(EggnemyConfig):
     fps: int
     model_width: int
     model_height: int
-    
 
-    
+
 
 class HitboxfulObject(Protocol):
     @property
@@ -312,28 +327,56 @@ class Model():
         self._fps: int = fps
         self._width: int = width
         self._height: int = height
-
+        # to make sure eggnemise dont spawn so near
+        min_distance = 50
         
         self.is_game_over: bool = False
         
-        self._egg: EggEntity = EggEntity(egg_config, attack_radius)
-        self._eggnemies: dict[int, EggnemyEntity] = {
-            num: EggnemyEntity(EntityConfig(
-                x=(random() * (width - 2 * width)) + width,
-                y=(random() * (height - 2 * height)) + height,
+        egg_config_centered = EntityConfig(
+            x=(width - egg_config.width) / 2,
+            y=(height - egg_config.height) / 2,
+            width=egg_config.width,
+            height=egg_config.height,
+            movement_speed=egg_config.movement_speed,
+            base_health=egg_config.base_health,
+            base_damage=egg_config.base_damage,
+            fps=egg_config.fps,
+            model_width=width,
+            model_height=height
+        )
+        self._egg: EggEntity = EggEntity(egg_config_centered, attack_radius)
+        # crashing the FUCK out
+        self._eggnemies: dict[int, EggnemyEntity] = {}
+        for num in range(50):
+            while True:
+                x = uniform(0, width - eggnemy_config.width)
+                y = uniform(0, height - eggnemy_config.height)
+                test_entity = Rectangle(x, y, eggnemy_config.width, eggnemy_config.height)
+                if self._egg.get_distance_to(test_entity) > min_distance:
+                    break
+            self._eggnemies[num] = EggnemyEntity(EntityConfig(
+                x=x,
+                y=y,
                 width=eggnemy_config.width,
                 height=eggnemy_config.height,
                 movement_speed=eggnemy_config.movement_speed,
                 base_health=eggnemy_config.base_health,
                 base_damage=eggnemy_config.base_damage,
                 fps=eggnemy_config.fps,
-                model_width=self._width,
-                model_height=self._height
-            ), self._egg)  for num in range(50)
-        }
+                model_width=width,
+                model_height=height
+            ), self._egg)
         
     def update(self, is_key_pressed: IsKeyPressed):
+        # game over girl
+        if self._egg.base_health <= 0:
+            self.is_game_over = True
+        
+        if self.is_game_over:
+            print('G')
+            return
         # this is hacky as hell
+        # girl *crying emoji*
         match(is_key_pressed.movement):
             #       W       S       A      D
             case((False, False, False, False) |
@@ -362,7 +405,7 @@ class Model():
             case((False, True, False, True)):
                 self._egg.move(Vector(1, 1))
             case _:
-                raise RuntimeError("How the fuck")
+                raise RuntimeError("How the fuck") # LMAOO
         
         if is_key_pressed.L:
             for i_num in self._eggnemies:
