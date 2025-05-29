@@ -21,14 +21,22 @@ def main(json_handler: json_handler_protocol) -> None:
     eggnemy_entity_limit: int = _settings['eggnemy_cap']
     attack_range: int = 10
  
-    # model = Model(0, 0, fps, width, height, eggnemy_entity_limit, attack_range, 
-    #               EntityConfig(egg_width, egg_height, 2, egg_health, 2, 10, 10), 
-    #               EggnemyConfig(eggnemy_width, eggnemy_height, 0.5, egg_health, 1))
+<<<<<<< HEAD
+    model = Model(0, 0, fps, width, height, eggnemy_entity_limit, attack_range, 
+                  EntityConfig(egg_width, egg_height, 2, egg_health, 2, 10, 10), 
+                  EggnemyConfig(eggnemy_width, eggnemy_height, 0.5, egg_health, 1))
     view = View(width, height)
-    model = Model(0, 0, fps, width, height, world_width, world_height, eggnemy_entity_limit, attack_range, 
+||||||| bc567cd
+    model = Model(fps, width, height, eggnemy_entity_limit, attack_range, 
+                  EntityConfig(egg_width, egg_height, 2, egg_health, 2, 10, 10), 
+                  EggnemyConfig(eggnemy_width, eggnemy_height, 0.5, egg_health, 1))
+    view = View(width, height)
+=======
+    model = Model(fps, width, height, world_width, world_height, eggnemy_entity_limit, attack_range, 
                   EntityConfig(egg_width, egg_height, 2, egg_health, 1, 10, 10),  # changed dmg to 1 for test purposes
                   EggnemyConfig(eggnemy_width, eggnemy_height, 0.5, eggnemy_health, 1))
-    # view = View(width, height, world_width, world_height)
+    view = View(width, height, world_width, world_height)
+>>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
     controller = Controller(model, view)
  
     controller.start()
