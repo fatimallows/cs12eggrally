@@ -10,16 +10,8 @@ import pyxel
 
 
 class Model():
-<<<<<<< HEAD
-    def __init__(self, world_x: float, world_y: int,
-                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
-||||||| bc567cd
-    def __init__(self, 
-                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
-=======
     def __init__(self, 
                  fps: int, width: int, height: int, world_width: int, world_height: int, eggnemy_entity_limit: int,
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
         # defines world border
@@ -68,16 +60,12 @@ class Model():
             ), self._fps, self._width, self._height, self._egg)
         
     def update(self, is_key_pressed: IsKeyPressed):
-<<<<<<< HEAD
         """updates the model based
 
         Args:
             is_key_pressed (IsKeyPressed): just takes in which keys are pressed
         """
-||||||| bc567cd
-=======
         self._elapsed_frames += 1
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
         # game over girl
         if self._egg is None or self._egg.is_dead:
             self._egg = None
@@ -113,48 +101,6 @@ class Model():
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
-<<<<<<< HEAD
-            # print(self._eggnemies)
-            print(self.world_top,  self.world_bottom)
-            print(self.world_left, self.world_right)
-            
-    def update_enemy_list(self, velocity_vector: Vector) -> None:
-        dead_enemies: list[int] = [] 
-        for key in self._eggnemies:
-            eggnemy = self._eggnemies[key] 
-            
-            if eggnemy.is_dead:
-                dead_enemies.append(key)
-                continue
-            
-            eggnemy.set_offset_vector(velocity_vector * eggnemy._movement_speed)
-            eggnemy.tick()
-                
-        for key in dead_enemies:
-            del self._eggnemies[key]    
-    
-    @property
-    def world_top(self) -> float:
-        return self._world_y
-    
-    @property
-    def world_bottom(self) -> float:
-        return self._world_y + self._height
-    
-    @property
-    def world_left(self) -> float:
-        return self._world_x
-    
-    @property
-    def world_right(self) -> float:
-        return self._world_x + self._width
-    
-    
-        
-        
-||||||| bc567cd
-            print(self._eggnemies)
-=======
             print(self._eggnemies)
 
     # this is for time
@@ -164,7 +110,6 @@ class Model():
         seconds = total_seconds % 60
         return f"{minutes:02d}:{seconds:02d}"  # zero-padded time
 
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
             
             
             
