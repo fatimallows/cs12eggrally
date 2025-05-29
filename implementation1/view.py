@@ -63,14 +63,6 @@ class View:
         pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
 
         self.draw_world_border(model._world_x, model._world_y, ox, oy, model)
-        # self.draw_world_border(model)
-
-        # text_width = len(timer_text) * 5  # pixel  
-        # x = pyxel.width - text_width - 2  # padding from the right
-        # y = 7
-
-        # pyxel.text(x, y, timer_text, 7, None)
-        # phase 0 specs technically
         
         if model._egg is not None:
             offset_x, offset_y = self.compute_camera_offset(
@@ -178,8 +170,8 @@ class View:
         # right
         pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
         
-        num_x_gridlines: int = 30
-        num_y_gridlines: int = 30
+        num_x_gridlines: int = 10
+        num_y_gridlines: int = 10
         
         x_gridline_spacing: int = int(model._world_width) // num_x_gridlines
         y_gridline_spacing: int = int(model._world_height) // num_y_gridlines
@@ -188,12 +180,12 @@ class View:
         pyxel.line(model.world_x, model.world_y, model.world_x + model._world_width, model.world_y, pyxel.COLOR_WHITE)
 
         for i in range(num_x_gridlines):
-            x_coord =  i*x_gridline_spacing #+ model.world_left
-            pyxel.line(x_coord, model.world_top, x_coord, model.world_bottom, pyxel.COLOR_WHITE)
+            x_coord =  i*x_gridline_spacing + model.world_left
+            pyxel.line(x_coord, model.world_top, x_coord, model.world_bottom, pyxel.COLOR_LIGHT_BLUE)
             
         for i in range(num_y_gridlines):
-            y_coord = i*y_gridline_spacing #+ model.world_top
-            pyxel.line(model.world_left, y_coord, model.world_right, y_coord, pyxel.COLOR_WHITE)
+            y_coord = i*y_gridline_spacing + model.world_top
+            pyxel.line(model.world_left, y_coord, model.world_right, y_coord, pyxel.COLOR_LIGHT_BLUE)
             
 
         # top

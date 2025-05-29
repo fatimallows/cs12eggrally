@@ -8,7 +8,7 @@
     "egg_width": 8,
     "egg_height": 18,
 
-    "eggnemy_cap": 1,
+    "eggnemy_cap": 10,
     "eggnemy_health" : 2,
     "eggnemy_width": 5,
     "eggnemy_height": 5,

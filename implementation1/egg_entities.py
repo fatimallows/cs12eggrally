@@ -178,11 +178,6 @@ class EggnemyEntity(Entity):
     def attack_egg(self, target: EggEntity) -> None:
         if self.is_in_collission(target):
             target.take_damage(self)
-            
-    # def _move_pathfinding(self, unit_vector_to_egg: Vector) -> None:        
-    #     velocity_vector: Vector = unit_vector_to_egg * self._movement_speed
-    #     self._x += velocity_vector.x_hat
-    #     self._y += velocity_vector.y_hat
     
     def move(self, vector_to_egg: Vector) -> None:
         # self._move_pathfinding(vector_to_egg)
@@ -191,9 +186,6 @@ class EggnemyEntity(Entity):
         print(move_vector)
         self._x += move_vector.x_hat
         self._y += move_vector.y_hat
-                
-        # self._x += self._offset_vector.x_hat
-        # self._y += self._offset_vector.y_hat
         
     def tick(self) -> None:
         super().tick()
@@ -208,4 +200,4 @@ class EggnemyEntity(Entity):
             
         self.attack_egg(self.target_egg)
         self.move(vector_to_egg * self._movement_speed)
-        
+        # print(vector_to_egg * self._movement_speed)

@@ -21,9 +21,6 @@ class Controller:
             self._view.was_l_just_pressed()
         )
         
-        
-        
-        
         curr_model = self._model
         conditions = (curr_model._no_boss_generated, curr_model._is_boss_alive)
                 
@@ -36,9 +33,6 @@ class Controller:
             return
     
         self._model.update(is_key_pressed)
-        
-        for i_num in self._model._eggnemies:
-            self._model._eggnemies[i_num].tick()
         
         
         
