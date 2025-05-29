@@ -11,7 +11,7 @@ import itertools
 
 
 class Model():
-    def __init__(self, world_x: int, world_y: int,
+    def __init__(self, #world_x: int, world_y: int,
                  fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int, 
                  eggnemy_entity_limit: int, eggnemy_kills_boss_trigger: int, attack_radius: float, 
                  egg_config: EntityConfig, eggnemy_config: EggnemyConfig, boss_eggnemy_config: EggnemyConfig):
@@ -20,10 +20,10 @@ class Model():
         # world definitions
         self._screen_width: int = screen_width
         self._screen_height: int = screen_height
-        self._world_x: float = world_x
-        self._world_y: float = world_y
         self._world_width: int = world_width
         self._world_height: int = world_height
+        self._world_x: float = (self._screen_width - self._world_width) / 2  
+        self._world_y: float = (self._screen_height - self._world_height) / 2
         
         # eggnemy generation fields
         # to make sure eggnemise dont spawn so near

@@ -25,7 +25,7 @@ def main(json_handler: json_handler_protocol) -> None:
     boss_height: float = _settings['boss_height']
     attack_range: int = 10
  
-    model = Model(0, 0, fps, width, height, world_width, world_height, eggnemy_entity_limit, boss_spawn_count, attack_range, 
+    model = Model(fps, width, height, world_width, world_height, eggnemy_entity_limit, boss_spawn_count, attack_range, 
                   EntityConfig(egg_width, egg_height, 2, egg_health, 1, 10, 10),  # changed dmg to 1 for test purposes
                   EggnemyConfig(eggnemy_width, eggnemy_height, 0.5, eggnemy_health, 1),
                   EggnemyConfig(boss_width, boss_height, 1, boss_health, 3))

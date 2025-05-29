@@ -61,17 +61,22 @@ class View:
 
         # for centering the cam
         if model._egg is not None:
-            ox = model._egg.x - self._width // 2 
-            oy = model._egg.y - self._height // 2
+            # print(f"({model._egg.x}, {model._egg.y})")
+            # screen_x_padding = (self._width - self._world_width) // 2 if self._width - self._world_width > 0 else 0
+            # screen_y_padding = (self._height - self._world_height) // 2 if self._height - self._world_height > 0 else 0
+            ox = (model._egg.x) - self._width // 2 
+            oy = (model._egg.y) - self._height // 2
+            print(f"({model._egg.x} - {self._width // 2}, {model._egg.y} - {self._height // 2})")
+            
         else:
             ox = 0
             oy = 0
         
-        pyxel.circ(model._world_x, model._world_y, 2, pyxel.COLOR_WHITE)
-        pyxel.circ(model.world_left, model.world_top, 2, pyxel.COLOR_WHITE)
-        pyxel.circ(model.world_left, model.world_bottom, 2, pyxel.COLOR_WHITE)
-        pyxel.circ(model.world_right, model.world_top, 2, pyxel.COLOR_WHITE)
-        pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
+        # pyxel.circ(model._world_x, model._world_y, 2, pyxel.COLOR_WHITE)
+        # pyxel.circ(model.world_left, model.world_top, 2, pyxel.COLOR_WHITE)
+        # pyxel.circ(model.world_left, model.world_bottom, 2, pyxel.COLOR_WHITE)
+        # pyxel.circ(model.world_right, model.world_top, 2, pyxel.COLOR_WHITE)
+        # pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
 
         self.draw_world_border(model._world_x, model._world_y, ox, oy, model)
         
@@ -162,16 +167,6 @@ class View:
         border_color = pyxel.COLOR_WHITE
         thickness = 1
         
-
-        # top
-        pyxel.rect(-ox, -oy, world_width, thickness, border_color)
-        # bottom
-        pyxel.rect(-ox, world_height - thickness - oy, world_width, thickness, border_color)
-        # left
-        pyxel.rect(-ox, -oy, thickness, world_height, border_color)
-        # right
-        pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
-        
         num_x_gridlines: int = 5
         num_y_gridlines: int = 5
         
@@ -188,7 +183,15 @@ class View:
         for i in range(num_y_gridlines):
             y_coord = i*y_gridline_spacing + model.world_top
             pyxel.line(model.world_left, y_coord, model.world_right, y_coord, pyxel.COLOR_LIGHT_BLUE)
-            
+        
+        # top
+        pyxel.rect(-ox, -oy, world_width, thickness, border_color)
+        # bottom
+        pyxel.rect(-ox, world_height - thickness - oy, world_width, thickness, border_color)
+        # left
+        pyxel.rect(-ox, -oy, thickness, world_height, border_color)
+        # right
+        pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
 
         # top
         # pyxel.rect(model.world_left, model.world_top, model._world_width, thickness, border_color)
