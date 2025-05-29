@@ -1,9 +1,9 @@
 {
     "game_fps": 30,
-    "screen_width": 256,
+    "screen_width": 512,
     "screen_height": 256,
-    "world_width": 256,
-    "world_height": 256,
+    "world_width": 512,
+    "world_height": 512,
     "egg_health": 10,
     "egg_width": 8,
     "egg_height": 18,

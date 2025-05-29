@@ -49,42 +49,38 @@ class View:
         timer_text = f"Time: {elapsed}"
 
         # for centering the cam
-        ox = model._egg.x - self._width // 2
-        oy = model._egg.y - self._height // 2
+        if model._egg is not None:
+            ox = model._egg.x - self._width // 2 
+            oy = model._egg.y - self._height // 2
+        else:
+            ox = 0
+            oy = 0
+        
+        pyxel.circ(model._world_x, model._world_y, 2, pyxel.COLOR_WHITE)
+        pyxel.circ(model.world_left, model.world_top, 2, pyxel.COLOR_WHITE)
+        pyxel.circ(model.world_left, model.world_bottom, 2, pyxel.COLOR_WHITE)
+        pyxel.circ(model.world_right, model.world_top, 2, pyxel.COLOR_WHITE)
+        pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
 
-        self.draw_world_border(model._world_width, model._world_height, ox, oy)
+        self.draw_world_border(model._world_x, model._world_y, ox, oy)
+        # self.draw_world_border(model)
 
         text_width = len(timer_text) * 5  # pixel  
         x = pyxel.width - text_width - 2  # padding from the right
         y = 7
 
-        pyxel.text(x, y, timer_text, 7)
+        pyxel.text(x, y, timer_text, 7, None)
         # phase 0 specs technically
         
         if model._egg is not None:
-<<<<<<< HEAD
-            self.draw_egg(model._egg)
-            
-        # world border
-        self.draw_world_border(model)
-            
-        for eggnemy in model._eggnemies:
-            self.draw_eggnemy(model._eggnemies[eggnemy])
-||||||| bc567cd
-            self.draw_egg(model._egg)
-            
-        for eggnemy in model._eggnemies:
-            self.draw_eggnemy(model._eggnemies[eggnemy])
-=======
             offset_x, offset_y = self.compute_camera_offset(
                 model._egg, model._world_width, model._world_height
             )
 
-            self.draw_egg(model._egg, offset_x, offset_y) # for camera offset PLEASE WORK
+            self.draw_egg(model._egg, offset_x, offset_y) # for camera offset PLEASE WORK 
 
             for eggnemy in model._eggnemies.values():
                 self.draw_eggnemy(eggnemy, offset_x, offset_y)
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
             
             
         # working game over screen
@@ -110,12 +106,14 @@ class View:
             print(box_height, box_width, box_x, box_y)
 
             pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
-        else:
-            # draw normal game stuff
-            self.draw_egg(model._egg, offset_x, offset_y)
-            for enemy in model._eggnemies.values():
-                self.draw_eggnemy(enemy, offset_x, offset_y)
+        # else:
+        #     # draw normal game stuff
+        #     self.draw_egg(model._egg, offset_x, offset_y)
+        #     # for enemy in model._eggnemies.values():
+        #     #     self.draw_eggnemy(enemy, offset_x, offset_y)
+        pyxel.circ(self._width // 2, self._height // 2, 2, pyxel.COLOR_LIME)
 
+            
             
     def draw_egg(self, egg: EggEntity, ox: int, oy: int) -> None:
         pyxel.rect(egg.x - ox, egg.y - oy, egg.width, egg.height, 7)
@@ -154,37 +152,14 @@ class View:
 
         pyxel.text(text_x, text_y, hp_text, 7, None)  # white
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, 5)  # background: gray
-<<<<<<< HEAD
-        pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
-        
-    def draw_world_border(self, model: Model) -> None:
-        """draw function that is responsible for drawing the world border, a white line
-
-        Args:
-            model (Model): the model of the game
-        """
-        
-        line_thickness: int = 1
-        
-        # line(x1, y1, x2, y2, col)
-        # left
-        pyxel.line(model.world_left, model.world_top, model.world_left, model.world_bottom, pyxel.COLOR_WHITE)
-        # right
-        pyxel.line(model.world_right, model.world_top, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
-        # top
-        pyxel.line(model.world_left, model.world_top, model.world_right, model.world_top, pyxel.COLOR_WHITE)
-        # bottom
-        pyxel.line(model.world_left, model.world_bottom, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
-||||||| bc567cd
-        pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
-=======
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, color)  # foreground: green
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
     
 
-    def draw_world_border(self, world_width: int, world_height: int, ox: int, oy: int):
+    def draw_world_border(self, world_width: float, world_height: float, ox: float, oy: float):
+    # def draw_world_border(self, model: Model):
         border_color = pyxel.COLOR_WHITE
         thickness = 1
+        
 
         # top
         pyxel.rect(-ox, -oy, world_width, thickness, border_color)
@@ -195,8 +170,16 @@ class View:
         # right
         pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
 
+        # top
+        # pyxel.rect(model.world_left, model.world_top, model._world_width, thickness, border_color)
+        # bottom
+        # pyxel.rect(model.world_left, model.world_bottom - thickness, model._world_width, thickness, border_color)
+        # left
+        # pyxel.rect(-ox, -oy, thickness, world_height, border_color)
+        # right
+        # pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
 
-    def compute_camera_offset(self, egg, world_width, world_height) -> tuple[int, int]:
+    def compute_camera_offset(self, egg: EggEntity, world_width: int, world_height: int) -> tuple[int, int]:
         half_width = self._width // 2
         half_height = self._height // 2
 

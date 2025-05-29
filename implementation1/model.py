@@ -7,37 +7,40 @@ from project_types import (
     Rectangle, IsKeyPressed, Vector,
     )
 import pyxel
+import itertools
 
 
 class Model():
-<<<<<<< HEAD
-    def __init__(self, world_x: float, world_y: int,
-                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
-||||||| bc567cd
-    def __init__(self, 
-                 fps: int, width: int, height: int, eggnemy_entity_limit: int,
-=======
-    def __init__(self, 
-                 fps: int, width: int, height: int, world_width: int, world_height: int, eggnemy_entity_limit: int,
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
+    def __init__(self, world_x: int, world_y: int,
+                 fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int, eggnemy_entity_limit: int,
                  attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
         self._fps: int = fps
-        # defines world border
+        
+        # world definitions
+        self._screen_width: int = screen_width
+        self._screen_height: int = screen_height
         self._world_x: float = world_x
         self._world_y: float = world_y
-        self._width: int = width
-        self._height: int = height
         self._world_width: int = world_width
         self._world_height: int = world_height
+        
+        # eggnemy generation fields
         # to make sure eggnemise dont spawn so near
-        min_distance = 50
-        self._elapsed_frames = 0
+        self._min_distance = 50
+        self._coutner = itertools.count()
+        self._eggnemy_entity_limit: int = eggnemy_entity_limit
+        self._eggnemy_config: EggnemyConfig = eggnemy_config
         
+        # game state
         self.is_game_over: bool = False
+        self._elapsed_frames: int = 0
+        self._eggnemies_killed: int = 0
         
+        
+        # entities
         egg_config_centered = EntityConfig(
-            x=(width - egg_config.width) / 2,
-            y=(height - egg_config.height) / 2,
+            x=(screen_width - egg_config.width) / 2,
+            y=(screen_height - egg_config.height) / 2,
             width=egg_config.width,
             height=egg_config.height,
             movement_speed=egg_config.movement_speed,
@@ -50,34 +53,41 @@ class Model():
         # crashing the FUCK out
         self._eggnemies: dict[int, EggnemyEntity] = {}
         
-        for num in range(eggnemy_entity_limit):
+        while True:
+            try:
+                self.generate_eggnemies()
+            except OverflowError:
+                break
+            
+    def generate_eggnemies(self):
+        print(self._eggnemies)
+        print(len(self._eggnemies))
+        if len(self._eggnemies) <= self._eggnemy_entity_limit:
             while True:
-                x = uniform(0, width - eggnemy_config.width)
-                y = uniform(0, height - eggnemy_config.height)
-                test_entity = Rectangle(x, y, eggnemy_config.width, eggnemy_config.height)
-                if self._egg.get_distance_to(test_entity) > min_distance:
+                x = uniform(0, self._screen_width - self._eggnemy_config.width)
+                y = uniform(0, self._screen_height - self._eggnemy_config.height)
+                test_entity = Rectangle(x, y, self._eggnemy_config.width, self._eggnemy_config.height)
+                if self._egg is not None and self._egg.get_distance_to(test_entity) > self._min_distance and self.is_test_entity_in_bounds(test_entity):
                     break
-            self._eggnemies[num] = EggnemyEntity(EntityConfig(
+            self._eggnemies[next(self._coutner)] = EggnemyEntity(EntityConfig(
                 x=x,
                 y=y,
-                width=eggnemy_config.width,
-                height=eggnemy_config.height,
-                movement_speed=eggnemy_config.movement_speed,
-                base_health=eggnemy_config.base_health,
-                base_damage=eggnemy_config.base_damage,
-            ), self._fps, self._width, self._height, self._egg)
+                width=self._eggnemy_config.width,
+                height=self._eggnemy_config.height,
+                movement_speed=self._eggnemy_config.movement_speed,
+                base_health=self._eggnemy_config.base_health,
+                base_damage=self._eggnemy_config.base_damage,
+            ), self._fps, self._world_width, self._world_height, self._egg)
+        else:
+            raise OverflowError("Eggnemy entity cap reached")
         
+    def is_test_entity_in_bounds(self, test_entity: Rectangle):
+        is_within_x: bool = test_entity.right <= self.world_right and test_entity.left >= self.world_left
+        is_within_y: bool = test_entity.top >= self.world_top and test_entity.bottom <= self.world_bottom
+        return is_within_x and is_within_y
+                
     def update(self, is_key_pressed: IsKeyPressed):
-<<<<<<< HEAD
-        """updates the model based
-
-        Args:
-            is_key_pressed (IsKeyPressed): just takes in which keys are pressed
-        """
-||||||| bc567cd
-=======
         self._elapsed_frames += 1
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
         # game over girl
         if self._egg is None or self._egg.is_dead:
             self._egg = None
@@ -113,11 +123,15 @@ class Model():
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
-<<<<<<< HEAD
-            # print(self._eggnemies)
-            print(self.world_top,  self.world_bottom)
-            print(self.world_left, self.world_right)
+            print(self._eggnemies)
             
+    # this is for time
+    def get_elapsed_time_formatted(self) -> str:
+        total_seconds = self._elapsed_frames // self._fps
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes:02d}:{seconds:02d}"  # zero-padded time
+    
     def update_enemy_list(self, velocity_vector: Vector) -> None:
         dead_enemies: list[int] = [] 
         for key in self._eggnemies:
@@ -125,13 +139,28 @@ class Model():
             
             if eggnemy.is_dead:
                 dead_enemies.append(key)
+                self._eggnemies_killed += 1
                 continue
             
             eggnemy.set_offset_vector(velocity_vector * eggnemy._movement_speed)
             eggnemy.tick()
                 
         for key in dead_enemies:
-            del self._eggnemies[key]    
+            del self._eggnemies[key]
+            
+        while True:
+            try:
+                self.generate_eggnemies()
+            except OverflowError:
+                break    
+    
+    @property
+    def world_x(self) -> float:
+        return self._world_x
+    
+    @property
+    def world_y(self) -> float:
+        return self._world_y
     
     @property
     def world_top(self) -> float:
@@ -139,7 +168,7 @@ class Model():
     
     @property
     def world_bottom(self) -> float:
-        return self._world_y + self._height
+        return self._world_y + self._world_height
     
     @property
     def world_left(self) -> float:
@@ -147,24 +176,12 @@ class Model():
     
     @property
     def world_right(self) -> float:
-        return self._world_x + self._width
+        return self._world_x + self._world_width
     
-    
-        
-        
-||||||| bc567cd
-            print(self._eggnemies)
-=======
-            print(self._eggnemies)
+    @property
+    def eggnemies_killed(self) -> int:
+        return self.eggnemies_killed
 
-    # this is for time
-    def get_elapsed_time_formatted(self) -> str:
-        total_seconds = self._elapsed_frames // self._fps
-        minutes = total_seconds // 60
-        seconds = total_seconds % 60
-        return f"{minutes:02d}:{seconds:02d}"  # zero-padded time
-
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
             
             
             
