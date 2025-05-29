@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Protocol, Callable
 from abc import ABC
-from enum import IntEnum, auto
 
 from _helpers import (CartesianPoint, Vector)
-from _egg_entities import Eggnemy
 
 class UpdateHandler(Protocol):
     def update(self):
@@ -14,16 +12,7 @@ class DrawHandler(Protocol):
     def draw(self):
         ...
         
-@dataclass(frozen=True)
-class EggnemyTag(IntEnum):
-    EGGNEMY = auto()
-    BOSS_EGGNEMY = auto()
 
-
-@dataclass(frozen=True)
-class EggnemyType:
-    eggnemy_tag: EggnemyTag
-    eggnemy: Eggnemy
 
 @dataclass
 class Hitbox(ABC):
@@ -39,11 +28,11 @@ class Hitbox(ABC):
         
     @property
     def width(self) -> float:
-        return self.width
+        return self._width
     
     @property
     def height(self) -> float:
-        return self.height
+        return self._height
     
     @property
     def top(self) -> float:
@@ -156,31 +145,12 @@ class Keybinds:
     left: bool
     right: bool
     attack: bool
-    y_one_pressed: bool = up ^ down
-    x_one_pressed: bool = left ^ right
-
-@dataclass
-class EggnemyList():
-    _eggnemy_list_len: int = 0
-    _eggnemy_list: list[EggnemyType]
     
-    def append(self, eggnemy: EggnemyType) -> None:
-        self._eggnemy_list.append(eggnemy)
-        if eggnemy.eggnemy_tag == EggnemyTag.EGGNEMY:
-            self._eggnemy_list_len += 1
-            
-    def pop(self, index: int) -> None:
-        self._eggnemy_list.pop(index)
-        if self._eggnemy_list[index].eggnemy_tag == EggnemyTag.EGGNEMY:
-            self._eggnemy_list_len -= 1
-        
-    def len(self) -> int:
-        return self._eggnemy_list_len
-    
-    def update_list(self, updater: callable) -> None:
-        for eggnemy_type in self._eggnemy_list:
-            updater(eggnemy_type)
-        
     @property
-    def eggnemy_list(self) -> list[EggnemyType]:
-        return self._eggnemy_list.copy()
+    def y_one_pressed(self) -> bool:
+        return self.up ^ self.down
+    
+    @property
+    def x_one_pressed(self) -> bool:
+        return self.left ^ self.right
+

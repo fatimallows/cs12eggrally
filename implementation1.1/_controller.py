@@ -1,4 +1,8 @@
+import pyxel
+
 from _model import Model
+from _project_types import Keybinds
+from _egg_entities import Eggnemy
 from _view import View
 
 class Controller():
@@ -12,7 +16,27 @@ class Controller():
         self._view.start(model.fps, self, self)
         
     def update(self):
-        ...
+        keybinds = Keybinds(
+            up=pyxel.btn(pyxel.KEY_W),
+            down=pyxel.btn(pyxel.KEY_S),
+            left=pyxel.btn(pyxel.KEY_A),
+            right=pyxel.btn(pyxel.KEY_D),
+            attack=pyxel.btn(pyxel.KEY_L)
+        )
+        
+        self._model.update(keybinds)
         
     def draw(self):
-        ...
+        self._view.clear_screen()
+        
+        print([a.eggnemy.hitbox for a in self._model._eggnemy_list._eggnemy_list])
+        
+        self._view.draw_border(self._model.world_right, self._model.world_left, self._model.world_top, self._model.world_bottom, self._model.world_width, self._model.world_height)
+        self._view.draw_information(self._model.elapsed_frames, self._model.eggnemies_killed)
+        
+        self._view.draw_hitbox(self._model._egg.hitbox, pyxel.COLOR_WHITE)
+        
+        self._model._eggnemy_list.update_list(self._draw_eggmemy)
+        
+    def _draw_eggmemy(self, eggnemy: Eggnemy):
+        self._view.draw_hitbox(eggnemy.hitbox, pyxel.COLOR_GRAY)

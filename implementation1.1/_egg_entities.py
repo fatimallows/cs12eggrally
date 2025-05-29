@@ -1,4 +1,9 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from enum import IntEnum, auto
+from typing import Callable
+
+
 
 from _project_types import (EggConfig, Hitbox, EggEntity, EggInfo)
 from _helpers import (CartesianPoint, Vector)
@@ -29,7 +34,7 @@ class Egg(ABC):
         )
         self._is_dead: bool = False
         
-    def deal_damage(self, egg_entity: EggEntity, damage_value: float) -> None:
+    def deal_damage(self, egg_entity: EggEntity) -> None:
         """checks if the point on the target egg entity closest to current egg is within damage range
 
         Args:
@@ -40,7 +45,7 @@ class Egg(ABC):
             return
         vector_to_hitbox: Vector = self._get_vector_to_hitbox(egg_entity.hitbox)
         if self._damage_hitbox.is_touching(vector_to_hitbox.convert_to_point()):
-            egg_entity._take_damage(damage_value)
+            egg_entity._take_damage(self.base_damage)
         
     def _take_damage(self, damage_value: float) -> None:
         """takes in damage, and changes the health accordingly
@@ -85,9 +90,8 @@ class Egg(ABC):
             
         return Vector(delta_x, delta_y)
 
-    @abstractmethod  
     def move(self, velocity_vector: Vector) -> None:
-        raise NotImplementedError
+        pass
         
     @property
     def hitbox(self) -> Hitbox:
@@ -140,3 +144,46 @@ class Eggnemy(Egg):
         self.hitbox.x += move_vector.x_hat
         self.hitbox.y += move_vector.y_hat
         
+        
+@dataclass(frozen=True)
+class EggnemyTag(IntEnum):
+    EGGNEMY = auto()
+    BOSS_EGGNEMY = auto()
+
+
+@dataclass(frozen=True)
+class EggnemyType:
+    eggnemy_tag: EggnemyTag
+    eggnemy: Eggnemy
+    
+@dataclass
+class EggnemyList():
+    _eggnemy_list: list[EggnemyType]
+    _eggnemy_list_len: int = 0
+    
+    def append(self, eggnemy: EggnemyType) -> None:
+        self._eggnemy_list.append(eggnemy)
+        if eggnemy.eggnemy_tag == EggnemyTag.EGGNEMY:
+            self._eggnemy_list_len += 1
+            
+    def pop(self, index: int) -> None:
+        self._eggnemy_list.pop(index)
+        if self._eggnemy_list[index].eggnemy_tag == EggnemyTag.EGGNEMY:
+            self._eggnemy_list_len -= 1
+        
+    def len(self) -> int:
+        return self._eggnemy_list_len
+    
+    def _clean_list(self) -> None:
+        for i, eggnemy_type in enumerate(self._eggnemy_list):
+            if eggnemy_type.eggnemy.is_dead:
+                self.pop(i)
+    
+    def update_list(self, updater: Callable) -> None:
+        for eggnemy_type in self._eggnemy_list:
+            updater(eggnemy_type.eggnemy)
+        # self._clean_list()
+        
+    @property
+    def eggnemy_list(self) -> list[EggnemyType]:
+        return self._eggnemy_list.copy()

@@ -1,11 +1,12 @@
 from random import uniform
+from typing import Callable
 from dataclasses import dataclass
 
 import itertools
 
-from _project_types import Hitbox, EggnemyType, EggnemyTag, EggnemyList, Keybinds
+from _project_types import Hitbox, Keybinds
 from _helpers import CartesianPoint, Vector
-from _egg_entities import EggConfig, Egg, Eggnemy
+from _egg_entities import EggConfig, Egg, Eggnemy, EggnemyType, EggnemyTag, EggnemyList
 
 
 
@@ -44,7 +45,7 @@ class Model():
         self._eggnemy_config: EggConfig = eggnemy_config
         self._boss_eggnemy_config: EggConfig = boss_eggnemy_config
         self._eggnemy_list: EggnemyList = EggnemyList(
-            eggnemy_list=[]
+            _eggnemy_list=[]
         )
         
     def _is_hitbox_in_bounds(self, hitbox: Hitbox) -> bool:
@@ -57,14 +58,14 @@ class Model():
             x = uniform(self._world_x, self._world_width - self._eggnemy_config.hitbox.width)
             y = uniform(self._world_y, self._world_height - self._eggnemy_config.hitbox.height)
             test_egg = Hitbox(CartesianPoint(x, y), self._eggnemy_config.hitbox.width, self._eggnemy_config.hitbox.height)
-            if not self._egg._is_dead and self._egg._get_vector_to_hitbox(test_egg) > self._safe_radius and self._is_hitbox_in_bounds(test_egg):
+            if not self._egg._is_dead and abs(self._egg._get_vector_to_hitbox(test_egg)) > self._safe_radius and self._is_hitbox_in_bounds(test_egg):
                 return CartesianPoint(x, y)
             
     def _generate_eggnemies(self) -> None:
         while self._eggnemy_list.len() < self._eggnemy_entity_limit:
             self._eggnemy_list.append(EggnemyType(
                 eggnemy_tag=EggnemyTag.EGGNEMY,
-                eggnemy=Eggnemy(self._eggnemy_config)
+                eggnemy=Eggnemy(self._eggnemy_config, self._egg)
             ))
             
     def _generate_boss(self) -> None:
@@ -77,6 +78,8 @@ class Model():
     def update(self, keybinds: Keybinds) -> None:
         if self.is_game_over:
             return
+        
+        self._generate_eggnemies()
         
         self._elapsed_frames += 1
         
@@ -99,12 +102,13 @@ class Model():
         
         move_vector = velocity_vector * self._egg.movement_speed
         
+        
         if keybinds.attack:
-            self._eggnemy_list.update_list(lambda eggnemy : self._egg.deal_damage(eggnemy))
+            self._eggnemy_list.update_list(self._damage_all)
             
         # moves the world
-        cond_x: bool = self.world_right + move_vector.x_hat >= self._egg.right and self._egg.left >= self.world_left + move_vector.x_hat  
-        cond_y: bool = self.world_bottom + move_vector.y_hat >= self._egg.bottom and self._egg.top >= self.world_top + move_vector.y_hat
+        cond_x: bool = self.world_right + move_vector.x_hat >= self._egg.hitbox.right and self._egg.hitbox.left >= self.world_left + move_vector.x_hat  
+        cond_y: bool = self.world_bottom + move_vector.y_hat >= self._egg.hitbox.bottom and self._egg.hitbox.top >= self.world_top + move_vector.y_hat
         
         # print(f"is x OOB {cond_x}\n is y OOB {cond_y}")
                 
@@ -120,22 +124,28 @@ class Model():
         if self._eggnemies_killed >= self._eggnemy_kills_boss_trigger and self._no_boss_generated:
             self._generate_boss()
     
-    def _move_all(self, move_vector: Vector) -> None:
+    def _move_all(self, move_vector: Vector) -> Callable:
         def _f(eggnemy: Eggnemy) -> None:
             eggnemy.move(move_vector)
         
         return _f
+    
+    def _damage_all(self, eggnemy: Eggnemy) -> None:
+            self._egg.deal_damage(eggnemy)
+            
+            if eggnemy.is_dead:
+                self._eggnemies_killed += 1
     
     @property
     def fps(self) -> int:
             return self._fps
         
     @property
-    def world_x(self) -> int:
+    def world_x(self) -> float:
             return self._world_x
         
     @property
-    def world_y(self) -> int:
+    def world_y(self) -> float:
             return self._world_y
         
     @property
@@ -176,7 +186,7 @@ class Model():
     
     @property
     def elapsed_frames(self) -> int:
-            return self.elapsed_frames
+            return self._elapsed_frames
         
     @property
     def eggnemies_killed(self) -> int:

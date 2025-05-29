@@ -12,6 +12,8 @@ class View:
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler) -> None:
         pyxel.init(self._screen_width, self._screen_height, fps=fps)
         
+        pyxel.run(update_handler.update, draw_handler.draw)
+        
     def clear_screen(self) -> None:
         pyxel.cls(0)
         
