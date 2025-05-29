@@ -1,11 +1,14 @@
 {
     "game_fps": 30,
-    "world_width": 200,
-    "world_height": 300,
-    "egg_health": 5,
-    "egg_width": 10,
-    "egg_height": 30,
+    "screen_width": 256,
+    "screen_height": 256,
+    "world_width": 256,
+    "world_height": 256,
+    "egg_health": 10,
+    "egg_width": 8,
+    "egg_height": 18,
+    "eggnemy_health" : 2,
     "eggnemy_cap": 10,
-    "eggnemy_width": 10,
-    "eggnemy_height": 30
+    "eggnemy_width": 5,
+    "eggnemy_height": 5
 }
