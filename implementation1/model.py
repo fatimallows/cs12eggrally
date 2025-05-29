@@ -66,7 +66,7 @@ class Model():
                 break
             
     def generate_eggnemies(self):
-        if len(self._eggnemies) < self._eggnemy_entity_limit:
+        if len(self._eggnemies) <= self._eggnemy_entity_limit:
             while True:
                 x = uniform(0, self._screen_width - self._eggnemy_config.width)
                 y = uniform(0, self._screen_height - self._eggnemy_config.height)
@@ -134,7 +134,6 @@ class Model():
         
         if self._eggnemies_killed >= self._eggnemy_kills_boss_trigger and self._no_boss_generated:
             self.generate_boss()
-        print(egg_velocity_vector)
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
@@ -154,7 +153,6 @@ class Model():
             
             if key == self._boss_id and eggnemy.is_dead:
                 self._is_boss_alive = False
-                print(f"boss is dead {self._is_boss_alive}")
                 self._eggnemy_entity_limit -= 1
                 
             if eggnemy.is_dead:
@@ -224,7 +222,7 @@ class Model():
     
     @property
     def eggnemies_killed(self) -> int:
-        return self.eggnemies_killed
+        return self._eggnemies_killed
 
             
             

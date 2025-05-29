@@ -183,7 +183,6 @@ class EggnemyEntity(Entity):
         # self._move_pathfinding(vector_to_egg)
         
         move_vector = self._offset_vector + vector_to_egg
-        print(move_vector)
         self._x += move_vector.x_hat
         self._y += move_vector.y_hat
         

@@ -47,6 +47,17 @@ class View:
         # thus is for time...
         elapsed = model.get_elapsed_time_formatted()
         timer_text = f"Time: {elapsed}"
+        eggnemies_killed_text = f"Eggnemies killed: {model.eggnemies_killed}"
+        
+        timer_width = len(timer_text) * 5  # pixel  
+        eggnemies_killed_width = len(eggnemies_killed_text) * 5 # 5??
+        x_timer = pyxel.width - timer_width - 2  # padding from the right
+        x_eggnemies_killed = pyxel.width - eggnemies_killed_width
+        y = 7
+
+        pyxel.text(x_timer, y, timer_text, 7, None)
+        pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
+        
 
         # for centering the cam
         if model._egg is not None:
@@ -70,15 +81,6 @@ class View:
             )
             
             self.draw_egg(model._egg, offset_x, offset_y) # for camera offset PLEASE WORK 
-                        
-            
-            timer_text = f"Time: {model.world_y} {model.world_x}"
-            
-            text_width = len(timer_text) * 5  # pixel  
-            x = pyxel.width - text_width - 2  # padding from the right
-            y = 7
-
-            pyxel.text(x, y, timer_text, 7, None)
 
             for eggnemy in model._eggnemies.values():
                 self.draw_eggnemy(eggnemy, offset_x, offset_y)
@@ -170,8 +172,8 @@ class View:
         # right
         pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
         
-        num_x_gridlines: int = 10
-        num_y_gridlines: int = 10
+        num_x_gridlines: int = 5
+        num_y_gridlines: int = 5
         
         x_gridline_spacing: int = int(model._world_width) // num_x_gridlines
         y_gridline_spacing: int = int(model._world_height) // num_y_gridlines
