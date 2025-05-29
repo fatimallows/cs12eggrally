@@ -179,26 +179,33 @@ class EggnemyEntity(Entity):
         if self.is_in_collission(target):
             target.take_damage(self)
             
-    def _move_pathfinding(self, vector_to_egg: Vector) -> None:
-        try:
-            direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
-        except:
-            direction_vector = Vector(0,0)
-            
-        velocity_vector: Vector = direction_vector * self._movement_speed
-        self._x += velocity_vector.x_hat
-        self._y += velocity_vector.y_hat
+    # def _move_pathfinding(self, unit_vector_to_egg: Vector) -> None:        
+    #     velocity_vector: Vector = unit_vector_to_egg * self._movement_speed
+    #     self._x += velocity_vector.x_hat
+    #     self._y += velocity_vector.y_hat
     
     def move(self, vector_to_egg: Vector) -> None:
-        self._move_pathfinding(vector_to_egg)
+        # self._move_pathfinding(vector_to_egg)
         
-        self._x += self._offset_vector.x_hat
-        self._y += self._offset_vector.y_hat
+        move_vector = self._offset_vector + vector_to_egg
+        print(move_vector)
+        self._x += move_vector.x_hat
+        self._y += move_vector.y_hat
+                
+        # self._x += self._offset_vector.x_hat
+        # self._y += self._offset_vector.y_hat
         
     def tick(self) -> None:
         super().tick()
         if self._is_dead:
             return
+        
         vector_to_egg: Vector = self.get_distance_vector_to(self.target_egg)
+        try:
+            vector_to_egg = vector_to_egg / abs(vector_to_egg)
+        except ZeroDivisionError:
+            vector_to_egg = Vector(0, 0)
+            
         self.attack_egg(self.target_egg)
-        self.move(vector_to_egg)
+        self.move(vector_to_egg * self._movement_speed)
+        

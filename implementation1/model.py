@@ -12,8 +12,9 @@ import itertools
 
 class Model():
     def __init__(self, world_x: int, world_y: int,
-                 fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int, eggnemy_entity_limit: int,
-                 attack_radius: float, egg_config: EntityConfig, eggnemy_config: EggnemyConfig):
+                 fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int, 
+                 eggnemy_entity_limit: int, eggnemy_kills_boss_trigger: int, attack_radius: float, 
+                 egg_config: EntityConfig, eggnemy_config: EggnemyConfig, boss_eggnemy_config: EggnemyConfig):
         self._fps: int = fps
         
         # world definitions
@@ -30,11 +31,15 @@ class Model():
         self._coutner = itertools.count()
         self._eggnemy_entity_limit: int = eggnemy_entity_limit
         self._eggnemy_config: EggnemyConfig = eggnemy_config
+        self._eggnemy_kills_boss_trigger: int = eggnemy_kills_boss_trigger 
         
         # game state
         self.is_game_over: bool = False
         self._elapsed_frames: int = 0
         self._eggnemies_killed: int = 0
+        self._no_boss_generated: bool = True
+        self._boss_id: int |  None = None 
+        self._is_boss_alive: bool | None = None
         
         
         # entities
@@ -52,6 +57,7 @@ class Model():
             attack_radius)
         # crashing the FUCK out
         self._eggnemies: dict[int, EggnemyEntity] = {}
+        self._boss_eggnemy_config: EggnemyConfig = boss_eggnemy_config
         
         while True:
             try:
@@ -60,9 +66,7 @@ class Model():
                 break
             
     def generate_eggnemies(self):
-        print(self._eggnemies)
-        print(len(self._eggnemies))
-        if len(self._eggnemies) <= self._eggnemy_entity_limit:
+        if len(self._eggnemies) < self._eggnemy_entity_limit:
             while True:
                 x = uniform(0, self._screen_width - self._eggnemy_config.width)
                 y = uniform(0, self._screen_height - self._eggnemy_config.height)
@@ -95,11 +99,19 @@ class Model():
         
         # vector that would dictate how the world and enemies should move based on 
         # user input
+        # just the direction
         velocity_vector = Vector(
             (1 if is_key_pressed.movement[2] else 0) + (-1 if is_key_pressed.movement[3] else 0), # x movement
             (1 if is_key_pressed.movement[0] else 0) + (-1 if is_key_pressed.movement[1] else 0), # y movement
-        ) * self._egg._movement_speed
+        )
         
+        try:
+            velocity_vector = velocity_vector / abs(velocity_vector) # normalize
+        except ZeroDivisionError:
+            velocity_vector = Vector(0, 0)
+        
+        egg_velocity_vector = velocity_vector * self._egg._movement_speed
+                    
         # if L is pressed on the current frame, attempt an attack on every single enemy in the game
         # a little inefficient but whatever
         if is_key_pressed.L: 
@@ -107,19 +119,22 @@ class Model():
                 self._egg.attack_eggnemy(self._eggnemies[i_num])
         
         # moves the world
-        cond_x: bool = self.world_right + velocity_vector.x_hat >= self._egg.right and self._egg.left >= self.world_left + velocity_vector.x_hat  
-        cond_y: bool = self.world_bottom + velocity_vector.y_hat >= self._egg.bottom and self._egg.top >= self.world_top + velocity_vector.y_hat
+        cond_x: bool = self.world_right + egg_velocity_vector.x_hat >= self._egg.right and self._egg.left >= self.world_left + egg_velocity_vector.x_hat  
+        cond_y: bool = self.world_bottom + egg_velocity_vector.y_hat >= self._egg.bottom and self._egg.top >= self.world_top + egg_velocity_vector.y_hat
         
-        print(f"is x OOB {cond_x}\n is y OOB {cond_y}")
+        # print(f"is x OOB {cond_x}\n is y OOB {cond_y}")
                 
-        self._world_x += velocity_vector.x_hat if cond_x else 0
-        self._world_y += velocity_vector.y_hat if cond_y else 0
-        
-        
+        self._world_x += egg_velocity_vector.x_hat if cond_x else 0
+        self._world_y += egg_velocity_vector.y_hat if cond_y else 0
+                
         self.update_enemy_list(Vector(
-            velocity_vector.x_hat if cond_x else 0,
-            velocity_vector.y_hat if cond_y else 0,
+            egg_velocity_vector.x_hat if cond_x else 0,
+            egg_velocity_vector.y_hat if cond_y else 0,
         ))
+        
+        if self._eggnemies_killed >= self._eggnemy_kills_boss_trigger and self._no_boss_generated:
+            self.generate_boss()
+        print(egg_velocity_vector)
             
         if pyxel.btnp(pyxel.KEY_Q):
             # use this to check certain values lmfao
@@ -137,12 +152,17 @@ class Model():
         for key in self._eggnemies:
             eggnemy = self._eggnemies[key] 
             
+            if key == self._boss_id and eggnemy.is_dead:
+                self._is_boss_alive = False
+                print(f"boss is dead {self._is_boss_alive}")
+                self._eggnemy_entity_limit -= 1
+                
             if eggnemy.is_dead:
                 dead_enemies.append(key)
                 self._eggnemies_killed += 1
                 continue
             
-            eggnemy.set_offset_vector(velocity_vector * eggnemy._movement_speed)
+            eggnemy.set_offset_vector(velocity_vector)
             eggnemy.tick()
                 
         for key in dead_enemies:
@@ -152,7 +172,31 @@ class Model():
             try:
                 self.generate_eggnemies()
             except OverflowError:
-                break    
+                break  
+            
+    def generate_boss(self) -> None :
+        self._eggnemy_entity_limit += 1
+        self._no_boss_generated = False
+        self._is_boss_alive = True
+        while True:
+            x = uniform(0, self._screen_width - self._eggnemy_config.width)
+            y = uniform(0, self._screen_height - self._eggnemy_config.height)
+            test_entity = Rectangle(x, y, self._eggnemy_config.width, self._eggnemy_config.height)
+            if self._egg is not None and self._egg.get_distance_to(test_entity) > self._min_distance and self.is_test_entity_in_bounds(test_entity):
+                break
+        boss_eggnemy: EggnemyEntity = EggnemyEntity(
+                EntityConfig(
+                    width=self._boss_eggnemy_config.width,
+                    height=self._boss_eggnemy_config.height,
+                    movement_speed=self._boss_eggnemy_config.movement_speed,
+                    base_health=self._boss_eggnemy_config.base_health,
+                    base_damage=self._boss_eggnemy_config.base_damage,
+                    x=x,
+                    y=y,
+                ), 
+            self._fps, self._world_width, self._world_height, self._egg)
+        self._boss_id = next(self._coutner)
+        self._eggnemies[self._boss_id] = boss_eggnemy
     
     @property
     def world_x(self) -> float:

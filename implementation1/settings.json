@@ -7,8 +7,14 @@
     "egg_health": 10,
     "egg_width": 8,
     "egg_height": 18,
+
+    "eggnemy_cap": 1,
     "eggnemy_health" : 2,
-    "eggnemy_cap": 10,
     "eggnemy_width": 5,
-    "eggnemy_height": 5
+    "eggnemy_height": 5,
+
+    "boss_spawn_counter": 30,
+    "boss_health": 30,
+    "boss_width": 10,
+    "boss_height": 10
 }

@@ -62,22 +62,31 @@ class View:
         pyxel.circ(model.world_right, model.world_top, 2, pyxel.COLOR_WHITE)
         pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
 
-        self.draw_world_border(model._world_x, model._world_y, ox, oy)
+        self.draw_world_border(model._world_x, model._world_y, ox, oy, model)
         # self.draw_world_border(model)
 
-        text_width = len(timer_text) * 5  # pixel  
-        x = pyxel.width - text_width - 2  # padding from the right
-        y = 7
+        # text_width = len(timer_text) * 5  # pixel  
+        # x = pyxel.width - text_width - 2  # padding from the right
+        # y = 7
 
-        pyxel.text(x, y, timer_text, 7, None)
+        # pyxel.text(x, y, timer_text, 7, None)
         # phase 0 specs technically
         
         if model._egg is not None:
             offset_x, offset_y = self.compute_camera_offset(
                 model._egg, model._world_width, model._world_height
             )
-
+            
             self.draw_egg(model._egg, offset_x, offset_y) # for camera offset PLEASE WORK 
+                        
+            
+            timer_text = f"Time: {model.world_y} {model.world_x}"
+            
+            text_width = len(timer_text) * 5  # pixel  
+            x = pyxel.width - text_width - 2  # padding from the right
+            y = 7
+
+            pyxel.text(x, y, timer_text, 7, None)
 
             for eggnemy in model._eggnemies.values():
                 self.draw_eggnemy(eggnemy, offset_x, offset_y)
@@ -103,15 +112,13 @@ class View:
             text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
             text_y = box_y + box_height // 2 - 4  # approx vertical center
 
-            print(box_height, box_width, box_x, box_y)
-
             pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
         # else:
         #     # draw normal game stuff
         #     self.draw_egg(model._egg, offset_x, offset_y)
         #     # for enemy in model._eggnemies.values():
         #     #     self.draw_eggnemy(enemy, offset_x, offset_y)
-        pyxel.circ(self._width // 2, self._height // 2, 2, pyxel.COLOR_LIME)
+        # pyxel.circ(self._width // 2, self._height // 2, 2, pyxel.COLOR_LIME)
 
             
             
@@ -130,7 +137,7 @@ class View:
 
     # made it dynamic (to accommodate every entity incld eggnemies and bosses)
     # changes color !
-    def draw_hp_bar(self, entity, ox: int, oy: int, color: int = 11) -> None:
+    def draw_hp_bar(self, entity: Entity, ox: int, oy: int, color: int = 11) -> None:
         # dimesions
         hp_text = f"{entity.base_health}/{entity.max_health}"
         text_width = len(hp_text) * 4 
@@ -155,8 +162,9 @@ class View:
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, color)  # foreground: green
     
 
-    def draw_world_border(self, world_width: float, world_height: float, ox: float, oy: float):
+    def draw_world_border(self, world_width: float, world_height: float, ox: float, oy: float, model: Model):
     # def draw_world_border(self, model: Model):
+    
         border_color = pyxel.COLOR_WHITE
         thickness = 1
         
@@ -169,6 +177,24 @@ class View:
         pyxel.rect(-ox, -oy, thickness, world_height, border_color)
         # right
         pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
+        
+        num_x_gridlines: int = 30
+        num_y_gridlines: int = 30
+        
+        x_gridline_spacing: int = int(model._world_width) // num_x_gridlines
+        y_gridline_spacing: int = int(model._world_height) // num_y_gridlines
+
+
+        pyxel.line(model.world_x, model.world_y, model.world_x + model._world_width, model.world_y, pyxel.COLOR_WHITE)
+
+        for i in range(num_x_gridlines):
+            x_coord =  i*x_gridline_spacing #+ model.world_left
+            pyxel.line(x_coord, model.world_top, x_coord, model.world_bottom, pyxel.COLOR_WHITE)
+            
+        for i in range(num_y_gridlines):
+            y_coord = i*y_gridline_spacing #+ model.world_top
+            pyxel.line(model.world_left, y_coord, model.world_right, y_coord, pyxel.COLOR_WHITE)
+            
 
         # top
         # pyxel.rect(model.world_left, model.world_top, model._world_width, thickness, border_color)
