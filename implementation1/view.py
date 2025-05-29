@@ -57,12 +57,6 @@ class View:
 
         pyxel.text(x_timer, y, timer_text, 7, None)
         pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
-            
-        if model._is_boss_alive == False and model._no_boss_generated == False and model._egg is not None:
-            win_text = "you win!"
-            (x, y) = self.compute_camera_offset(model._egg, model._world_width, model._world_height)
-            
-            pyxel.text(x, y, win_text, pyxel.COLOR_WHITE, None)
 
         # for centering the cam
         if model._egg is not None:
@@ -74,6 +68,12 @@ class View:
         else:
             ox = 0
             oy = 0
+            
+        if model._is_boss_alive == False and model._no_boss_generated == False and model._egg is not None:
+            win_text = "you win!"
+            (x, y) = (ox, oy)
+            
+            pyxel.text(x - (len(win_text)) / 2, y - (model._egg.height) // 2, win_text, pyxel.COLOR_YELLOW, None)
 
         self.draw_world_border(model)
         

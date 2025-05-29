@@ -13,7 +13,7 @@
     "eggnemy_width": 5,
     "eggnemy_height": 5,
 
-    "boss_spawn_counter": 100,
+    "boss_spawn_counter": 1,
     "boss_health": 30,
     "boss_width": 10,
     "boss_height": 10
