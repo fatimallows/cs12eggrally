@@ -35,7 +35,7 @@ class Model():
         self._eggnemy_kills_boss_trigger: int = eggnemy_kills_boss_trigger 
         
         # game state
-        self.is_game_over: bool = False
+        self._is_game_over: bool = False
         self._elapsed_frames: int = 0
         self._eggnemies_killed: int = 0
         self._no_boss_generated: bool = True
