@@ -68,12 +68,6 @@ class View:
         else:
             ox = 0
             oy = 0
-            
-        if model._is_boss_alive == False and model._no_boss_generated == False and model._egg is not None:
-            win_text = "you win!"
-            (x, y) = (ox, oy)
-            
-            pyxel.text(x - (len(win_text)) / 2, y - (model._egg.height) // 2, win_text, pyxel.COLOR_YELLOW, None)
 
         self.draw_world_border(model)
         
@@ -109,6 +103,12 @@ class View:
             text_y = box_y + box_height // 2 - 4  # approx vertical center
 
             pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
+            
+        if model._is_boss_alive == False and model._no_boss_generated == False and model._egg is not None:
+            win_text = "you win!"
+            (x, y) = (ox, oy)
+            
+            pyxel.text(x - len(win_text), y - (model._egg.height) // 2, win_text, pyxel.COLOR_YELLOW, None)
         # else:
         #     # draw normal game stuff
         #     self.draw_egg(model._egg, offset_x, offset_y)
