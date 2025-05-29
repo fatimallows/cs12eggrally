@@ -48,6 +48,9 @@ class View:
         elapsed = model.get_elapsed_time_formatted()
         timer_text = f"Time: {elapsed}"
 
+        if model._egg is None:
+            return
+
         # for centering the cam
         ox = model._egg.x - self._width // 2
         oy = model._egg.y - self._height // 2
@@ -58,33 +61,28 @@ class View:
         x = pyxel.width - text_width - 2  # padding from the right
         y = 7
 
-        pyxel.text(x, y, timer_text, 7)
+        pyxel.text(x, y, timer_text, 7, None)
         # phase 0 specs technically
         
-        if model._egg is not None:
-<<<<<<< HEAD
-            self.draw_egg(model._egg)
-            
-        # world border
-        self.draw_world_border(model)
+        
             
         for eggnemy in model._eggnemies:
             self.draw_eggnemy(model._eggnemies[eggnemy])
-||||||| bc567cd
-            self.draw_egg(model._egg)
-            
-        for eggnemy in model._eggnemies:
-            self.draw_eggnemy(model._eggnemies[eggnemy])
-=======
             offset_x, offset_y = self.compute_camera_offset(
                 model._egg, model._world_width, model._world_height
             )
-
+            
+        if model._egg is not None:
+        #     self.draw_egg(model._egg)
+            
+        # # world border
+        # self.draw_world_border(model)
             self.draw_egg(model._egg, offset_x, offset_y) # for camera offset PLEASE WORK
 
             for eggnemy in model._eggnemies.values():
                 self.draw_eggnemy(eggnemy, offset_x, offset_y)
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
+
+            
             
             
         # working game over screen
@@ -154,32 +152,28 @@ class View:
 
         pyxel.text(text_x, text_y, hp_text, 7, None)  # white
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, 5)  # background: gray
-<<<<<<< HEAD
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
         
-    def draw_world_border(self, model: Model) -> None:
-        """draw function that is responsible for drawing the world border, a white line
+    # def draw_world_border(self, model: Model) -> None:
+    # def draw_world_border(self, model: Model) -> None:
+        # """draw function that is responsible for drawing the world border, a white line
 
-        Args:
-            model (Model): the model of the game
-        """
+        # Args:
+        #     model (Model): the model of the game
+        # """
         
-        line_thickness: int = 1
+        # line_thickness: int = 1
         
-        # line(x1, y1, x2, y2, col)
-        # left
-        pyxel.line(model.world_left, model.world_top, model.world_left, model.world_bottom, pyxel.COLOR_WHITE)
-        # right
-        pyxel.line(model.world_right, model.world_top, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
-        # top
-        pyxel.line(model.world_left, model.world_top, model.world_right, model.world_top, pyxel.COLOR_WHITE)
-        # bottom
-        pyxel.line(model.world_left, model.world_bottom, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
-||||||| bc567cd
-        pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
-=======
-        pyxel.rect(bar_x, bar_y, filled_width, bar_height, color)  # foreground: green
->>>>>>> cac6a82c91dd7a07a80c456f9600e2b1cb47c6fa
+        # # line(x1, y1, x2, y2, col)
+        # # left
+        # pyxel.line(model.world_left, model.world_top, model.world_left, model.world_bottom, pyxel.COLOR_WHITE)
+        # # right
+        # pyxel.line(model.world_right, model.world_top, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
+        # # top
+        # pyxel.line(model.world_left, model.world_top, model.world_right, model.world_top, pyxel.COLOR_WHITE)
+        # # bottom
+        # pyxel.line(model.world_left, model.world_bottom, model.world_right, model.world_bottom, pyxel.COLOR_WHITE)
+        # pyxel.rect(bar_x, bar_y, filled_width, bar_height, color)  # foreground: green
     
 
     def draw_world_border(self, world_width: int, world_height: int, ox: int, oy: int):
