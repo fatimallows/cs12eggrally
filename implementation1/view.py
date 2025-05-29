@@ -61,24 +61,16 @@ class View:
 
         # for centering the cam
         if model._egg is not None:
-            # print(f"({model._egg.x}, {model._egg.y})")
-            # screen_x_padding = (self._width - self._world_width) // 2 if self._width - self._world_width > 0 else 0
-            # screen_y_padding = (self._height - self._world_height) // 2 if self._height - self._world_height > 0 else 0
-            ox = (model._egg.x) - self._width // 2 
-            oy = (model._egg.y) - self._height // 2
-            print(f"({model._egg.x} - {self._width // 2}, {model._egg.y} - {self._height // 2})")
+            ox = (self._width - model._egg.width) // 2 
+            oy = (self._height - model._egg.height) // 2
+            # print(f"({model._egg.x} - {self._width // 2}, {model._egg.y} - {self._height // 2})")
+            print(f"({ox}, {oy})")
             
         else:
             ox = 0
             oy = 0
-        
-        # pyxel.circ(model._world_x, model._world_y, 2, pyxel.COLOR_WHITE)
-        # pyxel.circ(model.world_left, model.world_top, 2, pyxel.COLOR_WHITE)
-        # pyxel.circ(model.world_left, model.world_bottom, 2, pyxel.COLOR_WHITE)
-        # pyxel.circ(model.world_right, model.world_top, 2, pyxel.COLOR_WHITE)
-        # pyxel.circ(model.world_right, model.world_bottom, 2, pyxel.COLOR_WHITE)
 
-        self.draw_world_border(model._world_x, model._world_y, ox, oy, model)
+        self.draw_world_border(model)
         
         if model._egg is not None:
             offset_x, offset_y = self.compute_camera_offset(
@@ -161,7 +153,7 @@ class View:
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, color)  # foreground: green
     
 
-    def draw_world_border(self, world_width: float, world_height: float, ox: float, oy: float, model: Model):
+    def draw_world_border(self, model: Model):
     # def draw_world_border(self, model: Model):
     
         border_color = pyxel.COLOR_WHITE
@@ -173,9 +165,6 @@ class View:
         x_gridline_spacing: int = int(model._world_width) // num_x_gridlines
         y_gridline_spacing: int = int(model._world_height) // num_y_gridlines
 
-
-        pyxel.line(model.world_x, model.world_y, model.world_x + model._world_width, model.world_y, pyxel.COLOR_WHITE)
-
         for i in range(num_x_gridlines):
             x_coord =  i*x_gridline_spacing + model.world_left
             pyxel.line(x_coord, model.world_top, x_coord, model.world_bottom, pyxel.COLOR_LIGHT_BLUE)
@@ -185,13 +174,13 @@ class View:
             pyxel.line(model.world_left, y_coord, model.world_right, y_coord, pyxel.COLOR_LIGHT_BLUE)
         
         # top
-        pyxel.rect(-ox, -oy, world_width, thickness, border_color)
+        pyxel.rect(model.world_x, model.world_y, model._world_width, thickness, border_color)
         # bottom
-        pyxel.rect(-ox, world_height - thickness - oy, world_width, thickness, border_color)
+        pyxel.rect(model.world_x, model._world_height + model.world_y, model._world_width, thickness, border_color)
         # left
-        pyxel.rect(-ox, -oy, thickness, world_height, border_color)
+        pyxel.rect(model.world_x, model.world_y, thickness, model._world_height, border_color)
         # right
-        pyxel.rect(world_width - thickness - ox, -oy, thickness, world_height, border_color)
+        pyxel.rect(model._world_width + model.world_x, model.world_y, thickness, model._world_height, border_color)
 
         # top
         # pyxel.rect(model.world_left, model.world_top, model._world_width, thickness, border_color)
@@ -209,6 +198,10 @@ class View:
         # center camera on egg
         ox = (egg.x + egg.width // 2) - half_width
         oy = (egg.y + egg.height // 2) - half_height
+        
+        # ox = (egg.width - self._width) // 2
+        # oy = (egg.height - self._height) // 2
+
 
         return ox, oy
 # class View:

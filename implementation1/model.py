@@ -28,6 +28,7 @@ class Model():
         # eggnemy generation fields
         # to make sure eggnemise dont spawn so near
         self._min_distance = 50
+        # self._spawn_radius = (self._world_width ** 2 + self._world_height ** 2) ** 0.5
         self._coutner = itertools.count()
         self._eggnemy_entity_limit: int = eggnemy_entity_limit
         self._eggnemy_config: EggnemyConfig = eggnemy_config
@@ -68,8 +69,8 @@ class Model():
     def generate_eggnemies(self):
         if len(self._eggnemies) <= self._eggnemy_entity_limit:
             while True:
-                x = uniform(0, self._screen_width - self._eggnemy_config.width)
-                y = uniform(0, self._screen_height - self._eggnemy_config.height)
+                x = uniform(self._world_x, self._world_width - self._eggnemy_config.width)
+                y = uniform(self._world_y, self._world_height - self._eggnemy_config.height)
                 test_entity = Rectangle(x, y, self._eggnemy_config.width, self._eggnemy_config.height)
                 if self._egg is not None and self._egg.get_distance_to(test_entity) > self._min_distance and self.is_test_entity_in_bounds(test_entity):
                     break

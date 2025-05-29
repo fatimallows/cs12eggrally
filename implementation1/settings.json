@@ -1,7 +1,7 @@
 {
     "game_fps": 30,
-    "screen_width": 512,
-    "screen_height": 512,
+    "screen_width": 300,
+    "screen_height": 100,
     "world_width": 256,
     "world_height": 256,
     "egg_health": 10,
@@ -13,7 +13,7 @@
     "eggnemy_width": 5,
     "eggnemy_height": 5,
 
-    "boss_spawn_counter": 1,
+    "boss_spawn_counter": 100,
     "boss_health": 30,
     "boss_width": 10,
     "boss_height": 10
