@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Protocol, Callable
 from abc import ABC
+import math
 
 from _helpers import (CartesianPoint, Vector)
 
@@ -12,6 +13,16 @@ class DrawHandler(Protocol):
     def draw(self):
         ...
         
+@dataclass(frozen=True)
+class InitEggConfig:
+    _width: float
+    _height: float
+    movement_speed: float
+    max_health: float
+    base_damage: float
+    damage_hitbox_scale: float # multiplier that decides how large the range of damage is, 1 means damage only when touching  and if > 1, there is some range
+    invincibility_frames: int
+        
 
 
 @dataclass
@@ -21,11 +32,12 @@ class Hitbox(ABC):
     _height: float
     
     def is_touching(self, point: CartesianPoint):
-        center_to_point_vector: Vector = self.center.convert_to_vector() - point.convert_to_vector()
-        center_to_corner_vector: Vector = self._coordinate.convert_to_vector() - self.center.convert_to_vector()
-        return abs(center_to_point_vector.x_hat) <= abs(center_to_corner_vector.x_hat) and \
-            abs(center_to_point_vector.y_hat) <= abs(center_to_corner_vector.y_hat)
-        
+        # center_to_point_vector: Vector =  point.convert_to_vector() - self.center.convert_to_vector()
+        center_to_corner_vector: Vector = self._coordinate.convert_to_vector() - self.center.convert_to_vector() 
+        center_to_point: Vector = center_to_corner_vector + point.convert_to_vector()
+        # breakpoint()
+        return abs(center_to_point.x_hat) <= abs(center_to_corner_vector.x_hat) and (
+            abs(center_to_point.y_hat) <= abs(center_to_corner_vector.y_hat))        
     @property
     def width(self) -> float:
         return self._width

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from enum import IntEnum, auto
+from enum import Enum, auto
 from typing import Callable
-
+import itertools
 
 
 from _project_types import (EggConfig, Hitbox, EggEntity, EggInfo)
@@ -17,13 +17,14 @@ class Egg(ABC):
         self._base_damage: float = egg_config.base_damage
         self._damage_hitbox_scale: float = egg_config.damage_hitbox_scale
         self._invincibility_frames: int = egg_config.invincibility_frames
+        self._i_frame_counter: int = 0
 
         center_to_corner_vector: Vector = Vector(
             x_hat=self._hitbox.width / 2,
             y_hat=self._hitbox.height / 2
             )
-        new_center_to_corner_vector: Vector = center_to_corner_vector * self._damage_hitbox_scale / 2
-        new_reference_vector: Vector = self._hitbox.center.convert_to_vector() + new_center_to_corner_vector
+        new_center_to_corner_vector: Vector = center_to_corner_vector * self._damage_hitbox_scale
+        new_reference_vector: Vector = self._hitbox.center.convert_to_vector() - new_center_to_corner_vector
         new_reference_point: CartesianPoint = new_reference_vector.convert_to_point()
         new_width_height_vector: Vector = (center_to_corner_vector * 2) * self._damage_hitbox_scale
         
@@ -32,6 +33,9 @@ class Egg(ABC):
             _width=new_width_height_vector.x_hat,
             _height=new_width_height_vector.y_hat,
         )
+        print(self._damage_hitbox)
+        print(self.hitbox)
+        # breakpoint()
         self._is_dead: bool = False
         
     def deal_damage(self, egg_entity: EggEntity) -> None:
@@ -42,6 +46,7 @@ class Egg(ABC):
             damage_value (float): damage value
         """
         if self.is_dead:
+            print("is dead")
             return
         vector_to_hitbox: Vector = self._get_vector_to_hitbox(egg_entity.hitbox)
         if self._damage_hitbox.is_touching(vector_to_hitbox.convert_to_point()):
@@ -53,10 +58,12 @@ class Egg(ABC):
         Args:
             damage_value (float): damage dealt to the current Egg
         """
-        if self._invincibility_frames > 0 and self.is_dead:
+        if self._i_frame_counter > 0 or self.is_dead:
             return 
         
         self._health -= damage_value
+        self._health = 0 if self.health < 0 else self._health
+        self._i_frame_counter = self._invincibility_frames
         
         if self.health <= 0:
             self._is_dead = True
@@ -89,6 +96,10 @@ class Egg(ABC):
             delta_x = 0
             
         return Vector(delta_x, delta_y)
+    
+    def tick(self) -> None:
+        self._i_frame_counter += -1 if self._i_frame_counter > 0 else 0
+        print(self._i_frame_counter)
 
     def move(self, velocity_vector: Vector) -> None:
         pass
@@ -118,8 +129,8 @@ class Egg(ABC):
         return self._base_damage
     
     @property
-    def is_dead(self) -> float:
-        return self._base_damage
+    def is_dead(self) -> bool:
+        return self._is_dead
     
 
 class Eggnemy(Egg):
@@ -141,12 +152,13 @@ class Eggnemy(Egg):
         
         move_vector: Vector = velocity_vector + self._get_tracking_vector()
         
-        self.hitbox.x += move_vector.x_hat
-        self.hitbox.y += move_vector.y_hat
-        
+        self._damage_hitbox.x += move_vector.x_hat
+        self._damage_hitbox.y += move_vector.y_hat
+        self._hitbox.x += move_vector.x_hat
+        self._hitbox.y += move_vector.y_hat
         
 @dataclass(frozen=True)
-class EggnemyTag(IntEnum):
+class EggnemyTag(Enum):
     EGGNEMY = auto()
     BOSS_EGGNEMY = auto()
 
@@ -158,16 +170,18 @@ class EggnemyType:
     
 @dataclass
 class EggnemyList():
-    _eggnemy_list: list[EggnemyType]
+    _eggnemy_list: dict[int, EggnemyType]
     _eggnemy_list_len: int = 0
+    _count = itertools.count()
     
     def append(self, eggnemy: EggnemyType) -> None:
-        self._eggnemy_list.append(eggnemy)
+        self._eggnemy_list[next(self._count)] = eggnemy
         if eggnemy.eggnemy_tag == EggnemyTag.EGGNEMY:
             self._eggnemy_list_len += 1
             
     def pop(self, index: int) -> None:
-        self._eggnemy_list.pop(index)
+        # self._eggnemy_list.pop(index)
+        del self._eggnemy_list[index]
         if self._eggnemy_list[index].eggnemy_tag == EggnemyTag.EGGNEMY:
             self._eggnemy_list_len -= 1
         
@@ -175,15 +189,24 @@ class EggnemyList():
         return self._eggnemy_list_len
     
     def _clean_list(self) -> None:
-        for i, eggnemy_type in enumerate(self._eggnemy_list):
-            if eggnemy_type.eggnemy.is_dead:
-                self.pop(i)
+        for key in self._eggnemy_list:
+            if self._eggnemy_list[key].eggnemy.is_dead:
+                self.pop(key)
     
     def update_list(self, updater: Callable) -> None:
-        for eggnemy_type in self._eggnemy_list:
-            updater(eggnemy_type.eggnemy)
+        cleanup: list[int] = []
+        for key in self._eggnemy_list:
+            updater(self._eggnemy_list[key].eggnemy)
+            if self._eggnemy_list[key].eggnemy.is_dead:
+                cleanup.append(key)
+                # self.pop(i)
+        if cleanup:
+            self._eggnemy_list = {key: self._eggnemy_list[key] for key in self._eggnemy_list if key not in cleanup}
+            # self._eggnemy_list = [self.eggnemy_list[i] for i in range(self.len()) if i not in cleanup]
+            self._eggnemy_list_len -= len(cleanup)
+            # breakpoint()
         # self._clean_list()
         
     @property
-    def eggnemy_list(self) -> list[EggnemyType]:
-        return self._eggnemy_list.copy()
+    def eggnemy_list(self) -> dict[int, EggnemyType]:
+        return {key: self._eggnemy_list[key] for key in self._eggnemy_list}
