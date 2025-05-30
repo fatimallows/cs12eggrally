@@ -19,14 +19,14 @@ class Egg(ABC):
         self._invincibility_frames: int = egg_config.invincibility_frames
         self._i_frame_counter: int = 0
 
-        center_to_corner_vector: Vector = Vector(
+        self._center_to_corner_vector: Vector = Vector(
             x_hat=self._hitbox.width / 2,
             y_hat=self._hitbox.height / 2
             )
-        new_center_to_corner_vector: Vector = center_to_corner_vector * self._damage_hitbox_scale
+        new_center_to_corner_vector: Vector = self._center_to_corner_vector * self._damage_hitbox_scale
         new_reference_vector: Vector = self._hitbox.center.convert_to_vector() - new_center_to_corner_vector
         new_reference_point: CartesianPoint = new_reference_vector.convert_to_point()
-        new_width_height_vector: Vector = (center_to_corner_vector * 2) * self._damage_hitbox_scale
+        new_width_height_vector: Vector = (self._center_to_corner_vector * 2) * self._damage_hitbox_scale
         
         self._damage_hitbox: Hitbox = Hitbox(
             _coordinate=new_reference_point,
@@ -48,8 +48,14 @@ class Egg(ABC):
         if self.is_dead:
             print("is dead")
             return
-        vector_to_hitbox: Vector = self._get_vector_to_hitbox(egg_entity.hitbox)
-        if self._damage_hitbox.is_touching(vector_to_hitbox.convert_to_point()):
+        relative_vector_to_hitbox: Vector = self._get_vector_to_hitbox(egg_entity.hitbox)
+        center_to_target: Vector = max(
+            (Vector(i*self._center_to_corner_vector.x_hat, j*self._center_to_corner_vector.y_hat) + relative_vector_to_hitbox
+            for i in [-1, 1]
+            for j in [-1, 1]), 
+            key=lambda v: abs(v) 
+        )
+        if self._damage_hitbox.is_touching(center_to_target):
             egg_entity._take_damage(self.base_damage)
         
     def _take_damage(self, damage_value: float) -> None:

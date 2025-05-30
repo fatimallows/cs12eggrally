@@ -31,13 +31,11 @@ class Hitbox(ABC):
     _width: float
     _height: float
     
-    def is_touching(self, point: CartesianPoint):
-        # center_to_point_vector: Vector =  point.convert_to_vector() - self.center.convert_to_vector()
-        center_to_corner_vector: Vector = self._coordinate.convert_to_vector() - self.center.convert_to_vector() 
-        center_to_point: Vector = center_to_corner_vector + point.convert_to_vector()
+    def is_touching(self, point: Vector):
+        center_to_corner_vector: Vector =  self._coordinate.convert_to_vector() - self.center.convert_to_vector()
         # breakpoint()
-        return abs(center_to_point.x_hat) <= abs(center_to_corner_vector.x_hat) and (
-            abs(center_to_point.y_hat) <= abs(center_to_corner_vector.y_hat))        
+        return abs(point.x_hat) <= abs(center_to_corner_vector.x_hat) and (
+            abs(point.y_hat) <= abs(center_to_corner_vector.y_hat))        
     @property
     def width(self) -> float:
         return self._width
