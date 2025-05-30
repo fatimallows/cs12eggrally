@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import itertools
 
-from _project_types import Hitbox, Keybinds, InitEggConfig
+from _project_types import Hitbox, Keybinds, InitEggConfig, EggInfo
 from _helpers import CartesianPoint, Vector
 from _egg_entities import EggConfig, Egg, Eggnemy, EggnemyType, EggnemyTag, EggnemyList
 
@@ -123,7 +123,24 @@ class Model():
         ),
             ))
         # breakpoint()
+    
+    def _attack_egg(self, eggnemy: Eggnemy) -> None:
+        eggnemy.deal_damage(self._egg)
+        
+    
+    def _move_all(self, move_vector: Vector) -> Callable:
+        def _f(eggnemy: Eggnemy) -> None:
+            eggnemy.move(move_vector)
+        
+        return _f
+    
+    def _damage_all(self, eggnemy: Eggnemy) -> None:
+            self._egg.deal_damage(eggnemy)
             
+            # print(eggnemy.health)
+            
+            if eggnemy.is_dead:
+                self._eggnemies_killed += 1
         
     def update(self, keybinds: Keybinds) -> None:
         # game over check
@@ -196,24 +213,6 @@ class Model():
                 print("you win")
                 self._is_game_over = True
                 return
-            
-    def _attack_egg(self, eggnemy: Eggnemy) -> None:
-        eggnemy.deal_damage(self._egg)
-        
-    
-    def _move_all(self, move_vector: Vector) -> Callable:
-        def _f(eggnemy: Eggnemy) -> None:
-            eggnemy.move(move_vector)
-        
-        return _f
-    
-    def _damage_all(self, eggnemy: Eggnemy) -> None:
-            self._egg.deal_damage(eggnemy)
-            
-            # print(eggnemy.health)
-            
-            if eggnemy.is_dead:
-                self._eggnemies_killed += 1
     
     @property
     def fps(self) -> int:
@@ -270,6 +269,10 @@ class Model():
     @property
     def eggnemies_killed(self) -> int:
             return self._eggnemies_killed
+        
+    @property
+    def egg(self) -> EggInfo:
+        return self._egg
     
     
 
