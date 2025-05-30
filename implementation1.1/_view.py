@@ -52,8 +52,13 @@ class View:
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, pyxel.COLOR_GRAY)  # background: gray
         pyxel.rect(bar_x, bar_y, filled_width, bar_height, pyxel.COLOR_GREEN)  # foreground: green
         
-    def draw_information(self, time_elapsed: str, eggnemies_killed: int) -> None:
-        timer_text = f"Time: {time_elapsed}"
+    def draw_information(self, frames_elapsed: int, fps: int, eggnemies_killed: int) -> None:
+        total_seconds = frames_elapsed // fps
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        # return f"{minutes:02d}:{seconds:02d}"
+        
+        timer_text = f"Time: {minutes:02d}:{seconds:02d}"
         eggnemies_killed_text = f"Eggnemies killed: {eggnemies_killed}"
         
         timer_width = len(timer_text) * 5  # pixel  
@@ -64,6 +69,17 @@ class View:
 
         pyxel.text(x_timer, y, timer_text, 7, None)
         pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
+        
+    def draw_win(self, egg_hitbox: Hitbox) -> None:
+        text: str = "YOU WIN !"
+        text_width: int = len(text)
+        
+        padding = 2
+        text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
+        text_y = egg_hitbox.y - egg_hitbox.height - padding
+
+        pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
+        
         
     def draw_border(self, world_right: float, world_left: float, world_top: float, world_bottom: float, 
                     world_width: float, world_height: float) -> None:

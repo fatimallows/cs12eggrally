@@ -35,13 +35,16 @@ class Controller():
         # print(self._model._eggnemy_list.eggnemy_list[0].eggnemy.hitbox)
         
         self._view.draw_border(self._model.world_right, self._model.world_left, self._model.world_top, self._model.world_bottom, self._model.world_width, self._model.world_height)
-        self._view.draw_information(self._model.elapsed_frames, self._model.eggnemies_killed)
+        self._view.draw_information(self._model.elapsed_frames, self._model.fps, self._model.eggnemies_killed)
         
-        self._view.draw_hitbox(self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
+        # self._view.draw_hitbox(self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(self._model._egg.hitbox, pyxel.COLOR_WHITE)
         self._view.draw_health(self._model._egg)
         
         self._model._eggnemy_list.update_list(self._draw_eggmemy)
+        
+        if self._model.is_game_over and not self._model._egg.is_dead:
+            self._view.draw_win(self._model._egg.hitbox)
         
         
     def _draw_eggmemy(self, eggnemy: Eggnemy):
