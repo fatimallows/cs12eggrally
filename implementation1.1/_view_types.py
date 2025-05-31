@@ -2,7 +2,6 @@ from __future__ import annotations
 from abc import ABC
 from typing import Protocol, Literal, Callable, Sequence
 
-import pyxel
 import itertools
 
 type ObjectNode = ObjectBox | None
@@ -13,6 +12,8 @@ type ObjectType = (
     Literal['FloatObject']|
     Literal['ContentObject'] 
 )
+
+# div is lowkey useless but i do not have the experience nor the luxyury of time to fix it sooo
 
 UNIQUE_IDENTIFIER = itertools.count() # begs for a better desing but i am pressed on time soo
 

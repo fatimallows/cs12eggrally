@@ -2,6 +2,7 @@ import pyxel
 
 from _project_types import (UpdateHandler, DrawHandler, Hitbox, EggInfo)
 
+
 class View:
     def __init__(self, screen_width: int, screen_height: int, world_width: int, world_height: int) -> None:
         self._screen_width: int = screen_width

@@ -4,11 +4,14 @@ from _model import Model
 from _project_types import Keybinds
 from _egg_entities import Eggnemy
 from _view import View
+from _view_types import (PyxelObjectModel, ContentObject, FloatObject, RootObject)
+
 
 class Controller():
     def __init__(self, model: Model, view: View):
         self._model = model
         self._view = view
+        self._pyxel_object_model = PyxelObjectModel(self._model.screen_width, self._model.screen_height)
         
     def start(self):
         model = self._model
@@ -33,6 +36,10 @@ class Controller():
         
         # print(self._model.egg.hitbox)
         # print(self._model.eggnemy_list.eggnemy_list[0].eggnemy.hitbox)
+        
+        self._pyxel_object_model.add_child_
+        
+        
         
         self._view.draw_border(self._model.world_right, self._model.world_left, self._model.world_top, self._model.world_bottom, self._model.world_width, self._model.world_height)
         self._view.draw_information(self._model.elapsed_frames, self._model.fps, self._model.eggnemies_killed)
