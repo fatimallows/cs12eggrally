@@ -70,15 +70,33 @@ class View:
         pyxel.text(x_timer, y, timer_text, 7, None)
         pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
         
-    def draw_win(self, egg_hitbox: Hitbox) -> None:
-        text: str = "YOU WIN !"
-        text_width: int = len(text)
+    # def draw_win(self, egg_hitbox: Hitbox) -> None:
+    #     text: str = "YOU WIN !"
+    #     text_width: int = len(text)
         
-        padding = 2
-        text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
-        text_y = egg_hitbox.y - egg_hitbox.height - padding
+    #     padding = 2
+    #     text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
+    #     text_y = egg_hitbox.y - egg_hitbox.height - padding
 
-        pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
+    #     pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
+        
+    def draw_end(self, egg_hitbox: Hitbox, text: str) -> None:
+        box_width = 100
+        box_height = 40
+        
+        box_x = (self._screen_width - box_width) // 2
+        box_y = (self._screen_height - box_height) // 2
+
+        # draw white box
+        pyxel.rect(box_x, box_y, box_width, box_height, pyxel.COLOR_WHITE)
+        # draw black border
+        pyxel.rectb(box_x, box_y, box_width, box_height, pyxel.COLOR_BLACK)
+
+        # draw centered f"{text}" text inside box
+        text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
+        text_y = box_y + box_height // 2 - 4  # approx vertical center
+
+        pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
         
         
     def draw_border(self, world_right: float, world_left: float, world_top: float, world_bottom: float, 
