@@ -48,7 +48,7 @@ class Hitbox(ABC):
 
         return False
 
-    def is_point_in_hitbox(self, point: CartesianPoint) -> list[bool]:
+    def is_point_in_hitbox(self, point: CartesianPoint) -> bool:
         return (self.left <= point.x <= self.right) and (self.top <= point.y <= self.bottom)
 
     @property

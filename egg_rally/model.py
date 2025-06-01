@@ -86,7 +86,7 @@ class Model():
         self._is_boss_alive: bool | None = None
         self._is_time_recorded: bool = False
 
-        self._leaderboard: list[int] = load_leaderboard()
+        self._leaderboard: list[int | float] = list(load_leaderboard())
 
         # entities
         self._egg: Egg = Egg(EggConfig(
@@ -127,17 +127,17 @@ class Model():
         )
 
     def restart(self) -> None:
-        self._is_game_over: bool = False
-        self._elapsed_frames: int = 0
-        self._eggnemies_killed: int = 0
-        self._no_boss_generated: bool = True
-        self._boss_id: int | None = None
-        self._is_boss_alive: bool | None = None
-        self._is_time_recorded: bool = False
-        self._eggnemy_list: EggnemyList = EggnemyList(
+        self._is_game_over = False
+        self._elapsed_frames = 0
+        self._eggnemies_killed = 0
+        self._no_boss_generated = True
+        self._boss_id = None
+        self._is_boss_alive = None
+        self._is_time_recorded = False
+        self._eggnemy_list = EggnemyList(
             _eggnemy_list={}
         )
-        self._egg: Egg = Egg(EggConfig(
+        self._egg = Egg(EggConfig(
             hitbox=Hitbox(
                 _coordinate=CartesianPoint(
                     (self.screen_width - int(EggSpecificData.egg_width)) // 2,
@@ -432,7 +432,7 @@ class Model():
         return self._egg
 
     @property
-    def leaderboard(self) -> list[int]:
+    def leaderboard(self) -> list[int | float]:
         return self._leaderboard
 # model = Model(
 #     fps=30,

@@ -13,6 +13,6 @@ def load_leaderboard() -> list[int]:
     return []
 
 
-def save_leaderboard(leaderboard: list[int]) -> None:
+def save_leaderboard(leaderboard: list[float | int]) -> None:
     with open(LEADERBOARD_FILE_SAVE, "w") as f:
         json.dump(leaderboard, f)
