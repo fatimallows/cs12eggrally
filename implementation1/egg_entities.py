@@ -140,7 +140,7 @@ class Entity(ABC):
         
     @property
     def is_dead(self) -> bool:
-        return self._is_dead
+        return self.base_health <= 0
     
 
 class EggEntity(Entity):
@@ -181,6 +181,39 @@ class EggnemyEntity(Entity):
                  target_egg: EggEntity) -> None:
         super().__init__(entity_config, fps, width, height)   
         self.target_egg = target_egg
+        self.base_health = 2
+        self.max_health = 2
+        
+    def attack_egg(self, target: EggEntity) -> None:
+        if self.is_in_collission(target):
+            target.take_damage(self)
+            
+    def move(self, vector_to_egg: Vector) -> None:
+        try:
+            direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
+        except:
+            direction_vector = Vector(0,0)
+        velocity_vector: Vector = direction_vector * self._movement_speed
+        self._x += velocity_vector.x_hat
+        self._y += velocity_vector.y_hat
+        
+    def tick(self) -> None:
+        super().tick()
+        if self._is_dead:
+            return
+        vector_to_egg: Vector = self.get_distance_vector_to(self.target_egg)
+        self.attack_egg(self.target_egg)
+        self.move(vector_to_egg)
+
+class BossEntity(Entity):
+    def __init__(self, 
+                 entity_config: EntityConfig, fps: int, width: int, height: int, 
+                 target_egg: EggEntity) -> None:
+        super().__init__(entity_config, fps, width, height)   
+        self.target_egg = target_egg
+        self.base_health = 100
+        self.max_health = 100
+        self.base_damage = 3
         
     def attack_egg(self, target: EggEntity) -> None:
         if self.is_in_collission(target):

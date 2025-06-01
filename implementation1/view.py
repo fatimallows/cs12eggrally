@@ -5,7 +5,7 @@ from project_types import (
     UpdateHandler, DrawHandler,
 )
 from egg_entities import (
-    Entity, EggEntity, EggnemyEntity
+    Entity, EggEntity, EggnemyEntity, BossEntity
 )
 # from project_types import UpdateHandler, DrawHandler, PipePairInfo, BirdInfo
 
@@ -13,11 +13,14 @@ class View:
     def __init__(self, width: int, height: int) -> None:
         self._width = width
         self._height = height
+        self.pyxelW = 256
+        self.pyxelH = 256
         
+    
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler) -> None:
-        pyxel.init(self._width, self._height, fps=fps)
+        pyxel.init(self.pyxelW,  self.pyxelH, title="Egg Rally!", fps=fps, capture_scale=3)
         pyxel.run(update_handler.update, draw_handler.draw)
-        
+    
     def clear_screen(self) -> None:
         pyxel.cls(0)
         
@@ -40,63 +43,103 @@ class View:
     # this isnt FUCKING WORKINGG
     def draw(self, model: Model) -> None:
         self.clear_screen()
-        
+        cam_x, cam_y = 0, 0
+
         # phase 0 specs technically
         if model._egg is not None:
-            self.draw_egg(model._egg)
+            cam_x, cam_y = 0, 0
+            cam_x = model._egg.x - self.pyxelW // 2 + model._egg.width // 2
+            cam_y = model._egg.y - self.pyxelH // 2 + model._egg.height // 2
+            # world border
+            pyxel.rectb(-cam_x, -cam_y, model._width, model._height, pyxel.COLOR_WHITE)
             
-        for eggnemy in model._eggnemies:
-            self.draw_eggnemy(model._eggnemies[eggnemy])
+
+            self.draw_egg(model._egg, cam_x, cam_y)
             
+            for enemy in model._eggnemies.values():
+                if enemy.is_dead:
+                    continue
+                screen_x = enemy.x - cam_x
+                screen_y = enemy.y - cam_y
+                if -enemy.width < screen_x < self.pyxelW and -enemy.height < screen_y < self.pyxelH:
+                    self.draw_eggnemy(enemy, cam_x, cam_y)
             
-        # working game over screen
-        # print("Drawing frame. Game over status:", model.is_game_over) 
+        #working game over screen
+        print("Drawing frame. Game over status:", model.is_game_over) 
         
-        # if model._egg is None:
-        #     # draw game over popup only
-        #     box_width = 100
-        #     box_height = 40
-        #     box_x = (self._width - box_width) // 2
-        #     box_y = (self._height - box_height) // 2
+        if model.is_game_over:
+            if model._egg.is_dead:
+                # draw game over popup only
+                model.is_game_over = True
+                box_width = 100
+                box_height = 40
+                box_x = (self.pyxelW - box_width) // 2
+                box_y = (self.pyxelH - box_height) // 2
 
-        #     # draw white box
-        #     pyxel.rect(box_x, box_y, box_width, box_height, pyxel.COLOR_WHITE)
-        #     # draw black border
-        #     pyxel.rectb(box_x, box_y, box_width, box_height, pyxel.COLOR_BLACK)
+                # draw white box
+                pyxel.rect(box_x, box_y, box_width, box_height, pyxel.COLOR_WHITE)
 
-        #     # draw centered "GAME OVER" text inside box
-        #     text = "GAME OVER"
-        #     text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
-        #     text_y = box_y + box_height // 2 - 4  # approx vertical center
+                # draw black border
+                pyxel.rectb(box_x, box_y, box_width, box_height, pyxel.COLOR_BLACK)
 
-        #     print(box_height, box_width, box_x, box_y)
+                # draw centered "GAME OVER" text inside box
+                text = "GAME OVER"
+                text_x = box_x + (box_width - len(text) * 4) // 2  # pyxel.text char width ~4 px
+                text_y = box_y + box_height // 2 - 4  # approx vertical center
 
-        #     pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
-        # else:
-        #     # draw normal game stuff
-        #     self.draw_egg(model._egg)
-        #     for enemy in model._eggnemies.values():
-        #         self.draw_eggnemy(enemy)
+                print(box_height, box_width, box_x, box_y)
+
+                pyxel.text(text_x, text_y, text, pyxel.COLOR_BLACK, None)
+                return
+
+            # please be over
+            elif model.has_won:
+                egg = model._egg
+                screen_x = egg.x - cam_x + egg.width // 2 - len("YOU WIN!") * 2
+                screen_y = egg.y - cam_y - 10  # slightly above egg
+                pyxel.text(screen_x, screen_y, "YOU WIN!", pyxel.COLOR_YELLOW)
+                return
+
+        # convert frames to mm:ss
+        total_seconds = model.timer_frames // 30
+        minutes = total_seconds // 30
+        seconds = total_seconds % 30
+        timer_text = f"{minutes:02}:{seconds:02}"
+
+        # draw at top-right (adjust x if needed)
+        pyxel.text(pyxel.width - 30, 10, timer_text, 7)
+
+        # draw score
+        score_text = f'{model.eggnemies_killed}'
+        pyxel.text(15, 10, score_text, 7)
 
             
-    def draw_egg(self, egg: EggEntity) -> None:
-        pyxel.rect(egg.x, egg.y, egg.width, egg.height, 1)
-
+    def draw_egg(self, egg: EggEntity, cam_x: int, cam_y: int) -> None:
+        screen_x = egg.x - cam_x 
+        screen_y = egg.y - cam_y
+        pyxel.rect(screen_x, screen_y, egg.width, egg.height, 7)
         # HP BARRRR
-        self.draw_hp_bar(egg)
+        self.draw_hp_bar(egg, cam_x, cam_y)
+
         
-    def draw_eggnemy(self, egg: EggnemyEntity) -> None:
-        pyxel.rect(egg.x, egg.y, egg.width, egg.height, 2)
+    def draw_eggnemy(self, egg: EggnemyEntity, cam_x: int, cam_y: int) -> None:
+        if isinstance(egg, BossEntity):
+            pyxel.rect(egg.x - cam_x, egg.y - cam_y, egg.width, egg.height, 8)
+        else:
+            pyxel.rect(egg.x - cam_x, egg.y - cam_y, egg.width, egg.height, 13)
+        self.draw_hp_bar(egg, cam_x, cam_y)
     
-    def draw_hp_bar(self, egg: EggEntity) -> None:
+
+    def draw_hp_bar(self, egg: EggEntity, cam_x: int, cam_y: int) -> None:
         # dimesions
         hp_text = f"{egg.base_health}/{egg.max_health}"
         text_width = len(hp_text) * 4 
 
         # position below the egg
         padding = 2
-        text_x = egg.x + (egg.width - text_width) // 2
-        text_y = egg.y + egg.height + padding
+        text_x = egg.x - cam_x + (egg.width - text_width) // 2
+        text_y = egg.y - cam_y + egg.height + padding
+
 
         # hp bar settings based on text width
         bar_width = text_width
@@ -110,33 +153,7 @@ class View:
 
         pyxel.text(text_x, text_y, hp_text, 7, None)  # white
         pyxel.rect(bar_x, bar_y, bar_width, bar_height, 5)  # background: gray
-        pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
-    
-# class View:
-#     def __init__(self, width: int, height: int):
-#         self._width = width
-#         self._height = height
- 
-#     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler):
-#         pyxel.init(self._width, self._height, fps=fps)
-#         pyxel.run(update_handler.update, draw_handler.draw)
- 
-#     def was_spacebar_just_pressed(self):
-#         return pyxel.btnp(pyxel.KEY_SPACE)
- 
-#     def clear_screen(self):
-#         pyxel.cls(0)
- 
-#     def draw_pipes(self, pipes: Sequence[PipePairInfo]):
-#         for pipe_pair in pipes:
-#             for pipe in [pipe_pair.top_pipe, pipe_pair.bottom_pipe]:
-#                 pyxel.rect(pipe.x, pipe.y, pipe.width, pipe.height, 4)
- 
-#     def draw_bird(self, bird: BirdInfo):
-#         pyxel.circ(bird.x, bird.y, bird.radius, 2)
- 
-#     def draw_score(self, score: int):
-#         pyxel.text(self._width // 2 - 3, 10, str(score), 7)
- 
-#     def draw_game_over(self):
-#         pyxel.text(self._width // 2 - 15, self._height // 2, "Game over", 7)
+        if isinstance(egg, EggnemyEntity):   
+            pyxel.rect(bar_x, bar_y, filled_width, bar_height, 4)  # foreground: red
+        else:
+            pyxel.rect(bar_x, bar_y, filled_width, bar_height, 11)  # foreground: green
