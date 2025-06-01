@@ -2,6 +2,7 @@ import pyxel
 
 from egg_rally.project_types import (
     UpdateHandler, DrawHandler, Hitbox, EggInfo)
+from egg_rally.view_types import ObjectBox
 
 
 class View:
