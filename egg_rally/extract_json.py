@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 import json
 from typing import Protocol, Sequence, Literal
 
@@ -18,11 +19,14 @@ class json_handler():
         Args:
             json_filename (str): _description_
         """
+        base_dir = os.path.dirname(__file__)
+        full_path = os.path.join(base_dir, json_filename)
+
         try:
-            with open(json_filename, 'r') as json_settings:
+            with open(full_path, 'r') as json_settings:
                 self._settings: SettingsDict = json.load(json_settings)
         except FileNotFoundError:
-            raise ValueError("file does not exist")
+            raise ValueError(f"file does not exist: {full_path}")
 
     def extract_settings(self, setting_args: Sequence[str] | Literal['all']) -> SettingsDict:
         """Extracts values of the settings in order of the arguements put in 
@@ -47,7 +51,7 @@ class json_handler():
 
 
 if __name__ == "__main__":
-    _object = json_handler('implementation1/settings.json')
+    _object = json_handler('egg_rally/settings.json')
     try:
         print(_object.extract_settings(
             ("game_fps", "world_width", "world_height")))

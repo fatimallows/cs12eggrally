@@ -11,7 +11,7 @@ from egg_rally.egg_entities import EggConfig, Egg, Eggnemy, EggnemyType, Eggnemy
 from egg_rally.extract_json import json_handler
 
 _settings = json_handler(
-    'egg_rally/settings.json').extract_settings('all')
+    'settings.json').extract_settings('all')
 
 
 @dataclass(frozen=True)
