@@ -174,7 +174,9 @@ class Controller():
 
     def _draw_eggmemy(self, eggnemy: Eggnemy):
         # self._view.draw_hitbox(eggnemy._damage_hitbox, pyxel.COLOR_YELLOW)
-        self._view.draw_hitbox(eggnemy.hitbox, pyxel.COLOR_GRAY)
+        x = eggnemy.hitbox.x
+        y = eggnemy.hitbox.y
+        pyxel.blt(x - 6.5, y - 5, 0, 0, 0, 16, 16)
         self._view.draw_health(eggnemy, 8)
 
     def _restart_game(self):

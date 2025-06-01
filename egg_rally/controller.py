@@ -65,7 +65,6 @@ class Controller():
             eggxperience=self._model.egg.eggxperience,
             eggxperience_required=self._model.egg.xp_threshold
         )
-
         self._view.draw_leaderboard(self._model._leaderboard)
         # self._view.draw_hitbox(self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(self._model.egg.hitbox, pyxel.COLOR_WHITE)
@@ -77,7 +76,7 @@ class Controller():
             self._view.draw_end(self._model.egg.hitbox, "YOU WIN")
 
         if self._model.is_game_over and self._model.egg.is_dead:
-            self._view.draw_end(self._model.egg.hitbox, "YOU LOSE")\
+            self._view.draw_end(self._model.egg.hitbox, "YOU LOSE")
 
         if self._model.in_enhancement_menu:
             self._view.draw_enhancement_screen(
@@ -85,7 +84,9 @@ class Controller():
 
     def _draw_eggmemy(self, eggnemy: Eggnemy):
         # self._view.draw_hitbox(eggnemy._damage_hitbox, pyxel.COLOR_YELLOW)
-        self._view.draw_hitbox(eggnemy.hitbox, pyxel.COLOR_GRAY)
+        x = eggnemy.hitbox.x
+        y = eggnemy.hitbox.y
+        pyxel.blt(x - 6.5, y - 5, 0, 0, 0, 16, 16)
         self._view.draw_health(eggnemy, 8)
 
         # c1 = eggnemy.hitbox.center

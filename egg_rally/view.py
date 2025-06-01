@@ -15,20 +15,16 @@ class View:
 
     def start(self, fps: int, update_handler: UpdateHandler, draw_handler: DrawHandler) -> None:
         pyxel.init(self._screen_width, self._screen_height, fps=fps)
-
+        pyxel.load("eggrally.pyxres")
         pyxel.run(update_handler.update, draw_handler.draw)
 
     def clear_screen(self) -> None:
         pyxel.cls(0)
 
     def draw_hitbox(self, hitbox: Hitbox, color: int) -> None:
-        pyxel.rect(
-            x=hitbox.x,
-            y=hitbox.y,
-            w=hitbox.width,
-            h=hitbox.height,
-            col=color
-        )
+        _x = hitbox.x
+        _y = hitbox.y
+        pyxel.blt(_x - 6.5, _y - 5, 1, 0, 0, 16, 16)
 
     def draw_health(self, egg_entity: EggInfo, hp_color: int) -> None:
         egg_hitbox = egg_entity.hitbox
@@ -38,24 +34,29 @@ class View:
         text_width = len(hp_text) * 4
 
         # position below the egg
+        # layout paddings
         padding = 2
-        text_x = egg_hitbox.x + (egg_hitbox.width - text_width) // 2
-        text_y = egg_hitbox.y + egg_hitbox.height + padding
-
-        # hp bar settings based on text width
-        bar_width = text_width
         bar_height = 2
+        bar_width = text_width
+
+        # positions
+        text_x = egg_hitbox.x + (egg_hitbox.width - text_width) // 2
+        text_y = egg_hitbox.y + egg_hitbox.height + padding + 6
+
+        bar_x = text_x
+        # space between text and bar (approx height of text + padding)
+        bar_y = text_y + 6
+
+        # health bar fill
         hp_ratio = egg_entity.health / egg_entity.max_health
         filled_width = int(bar_width * hp_ratio)
 
-        bar_x = text_x
-        bar_y = text_y + 8  # below text
-
-        pyxel.text(text_x, text_y, hp_text, pyxel.COLOR_WHITE, None)  # white
+        # draw
+        pyxel.text(text_x, text_y, hp_text, pyxel.COLOR_WHITE)
         pyxel.rect(bar_x, bar_y, bar_width, bar_height,
-                   pyxel.COLOR_GRAY)  # background: gray
+                   pyxel.COLOR_GRAY)  # background
         pyxel.rect(bar_x, bar_y, filled_width, bar_height,
-                   hp_color)  # foreground: green
+                   hp_color)       # foreground
 
     def draw_information(self, frames_elapsed: int, fps: int, eggnemies_killed: int) -> None:
         total_seconds = frames_elapsed // fps
