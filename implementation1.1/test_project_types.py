@@ -345,10 +345,13 @@ class TestKeybinds:
         assert Keybinds(up=False, down=True, left=False, right=False, attack=False).y_one_pressed is True
         assert Keybinds(up=True, down=True, left=False, right=False, attack=False).y_one_pressed is False
         assert Keybinds(up=False, down=False, left=False, right=False, attack=False).y_one_pressed is False
-
+        assert Keybinds(up=True, down=True, left=True, right=True, attack=False).y_one_pressed is False
+        assert Keybinds(up=True, down=False, left=True, right=False, attack=False).y_one_pressed is True
+        assert Keybinds(up=True, down=False, left=True, right=True, attack=True).y_one_pressed is True
     def test_keybinds_x_one_pressed(self):
         
         assert Keybinds(up=False, down=False, left=True, right=False, attack=False).x_one_pressed is True
         assert Keybinds(up=False, down=False, left=False, right=True, attack=False).x_one_pressed is True
         assert Keybinds(up=False, down=False, left=True, right=True, attack=False).x_one_pressed is False
         assert Keybinds(up=False, down=False, left=False, right=False, attack=False).x_one_pressed is False
+    
