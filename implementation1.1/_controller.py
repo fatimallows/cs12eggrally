@@ -15,6 +15,18 @@ class Controller():
         self._pyxel_object_model = PyxelObjectModel(
             self._model.screen_width, self._model.screen_height)
 
+        # egg_rally_object = self._pyxel_object_model.generate_float_object(
+        #     self._model.screen_width, (self._model.screen_height * 2) // 3, 'self', ['egg_rally_object'])
+        # leaderboard_object = self._pyxel_object_model.generate_float_object(
+        #     self._model.screen_width, self._model.screen_height // 3, 'self', [
+        #         'leaderboard_object']
+        # )
+        # leaderboard_object.float_to(
+        #     egg_rally_object.reference_point['x'], (self._model.screen_height * 2) // 3)
+
+        # self._pyxel_object_model.add_child_current_object(egg_rally_object)
+        # self._pyxel_object_model.add_child_current_object(leaderboard_object)
+
     def start(self):
         model = self._model
 
@@ -40,23 +52,12 @@ class Controller():
         # print(self._model.eggnemy_list.eggnemy_list[0].eggnemy.hitbox)
 
         # holy shit it works
-        # egg_rally_object = self._pyxel_object_model.generate_float_object(
-        #     self._model.screen_width, (self._model.screen_height * 2) // 3, 'self', {'egg_rally_object'})
-        # leaderboard_object = self._pyxel_object_model.generate_float_object(
-        #     self._model.screen_width, self._model.screen_height // 3, 'self', {
-        #         'leaderboard_object'}
-        # )
-        # leaderboard_object.float_to(
-        #     egg_rally_object.reference_point['x'], (self._model.screen_height * 2) // 3)
-
-        # self._pyxel_object_model.add_child_current_object(egg_rally_object)
-        # self._pyxel_object_model.add_child_current_object(leaderboard_object)
 
         # self._view.draw_object_box(
         #     self._pyxel_object_model.root, pyxel.COLOR_GRAY)
         # self._pyxel_object_model.go_to_node_with_tag('egg_rally_object')
         # self._view.draw_object_box(
-        #     self._pyxel_object_model.current_object, pyxel.COLOR_GREEN)
+        #     self._pyxel_object_model.current_object, pyxel.COLOR_GRAY)
         # self._pyxel_object_model.go_to_node_with_tag('leaderboard_object')
         # self._view.draw_object_box(
         #     self._pyxel_object_model.current_object, pyxel.COLOR_CYAN)
@@ -66,7 +67,8 @@ class Controller():
         self._view.draw_information(
             self._model.elapsed_frames, self._model.fps, self._model.eggnemies_killed)
 
-        # self._view.draw_hitbox(self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
+        # self._view.draw_hitbox(
+        #     self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(self._model.egg.hitbox, pyxel.COLOR_WHITE)
         self._view.draw_health(self._model.egg)
 

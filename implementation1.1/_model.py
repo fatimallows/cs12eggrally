@@ -7,19 +7,61 @@ import itertools
 from _project_types import Hitbox, Keybinds, InitEggConfig, EggInfo
 from _helpers import CartesianPoint, Vector
 from _egg_entities import EggConfig, Egg, Eggnemy, EggnemyType, EggnemyTag, EggnemyList
+from _extract_json import json_handler
+
+_settings = json_handler(
+    'implementation1.1/_settings.json').extract_settings('all')
+
+
+@dataclass(frozen=True)
+class SettingsData:
+    fps: float = _settings['game_fps']
+    eggnemy_cap: float = _settings['eggnemy_cap']
+    boss_spawn_counter: float = _settings['boss_spawn_counter']
+
+
+@dataclass(frozen=True)
+class EggSpecificData:
+    egg_health: float = _settings['egg_health']
+    egg_width: float = _settings['egg_width']
+    egg_height: float = _settings['egg_height']
+    movement_speed: float = 2
+    base_damage: float = 1
+    damage_hitbox_scale: float = 2
+    invincibility_frames: int = int(
+        SettingsData.fps) * 1  # fps * seconds per fps
+
+
+@dataclass(frozen=True)
+class EggnemySpecificData:
+    eggnemy_health: float = _settings['eggnemy_health']
+    eggnemy_width: float = _settings['eggnemy_width']
+    eggnemy_height: float = _settings['eggnemy_height']
+    movement_speed: float = 0.5
+    base_damage: float = 1
+    damage_hitbox_scale: float = 1
+    invincibility_frames: int = 0
+
+
+@dataclass(frozen=True)
+class BossEggnemySpecificData:
+    boss_health: float = _settings['boss_health']
+    boss_width: float = _settings['boss_width']
+    boss_height: float = _settings['boss_height']
+    movement_speed: float = 0.5
+    base_damage: float = 1
+    damage_hitbox_scale: float = 1
+    invincibility_frames: int = 0
 
 
 class Model():
-    def __init__(self,
-                 fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int,
-                 eggnemy_entity_limit: int, eggnemy_kills_boss_trigger: int,
-                 egg_config: InitEggConfig, eggnemy_config: InitEggConfig, boss_eggnemy_config: InitEggConfig):
+    def __init__(self, screen_width: float, screen_height: float, world_width: float, world_height: float) -> None:
         # world definitions
-        self._fps: int = fps
-        self._screen_width: int = screen_width
-        self._screen_height: int = screen_height
-        self._world_width: int = world_width
-        self._world_height: int = world_height
+        self._fps: int = int(SettingsData.fps)
+        self._screen_width: int = int(screen_width)
+        self._screen_height: int = int(screen_height)
+        self._world_width: int = int(world_width)
+        self._world_height: int = int(world_height)
         self._world_x: float = (
             self._screen_width - self._world_width) // 2 if self._screen_width - self._world_width > 0 else 0
         self._world_y: float = (
@@ -29,8 +71,9 @@ class Model():
         # to make sure eggnemise dont spawn so near
         self._safe_radius = 10
         self._counter = itertools.count()
-        self._eggnemy_entity_limit: int = eggnemy_entity_limit
-        self._eggnemy_kills_boss_trigger: int = eggnemy_kills_boss_trigger
+        self._eggnemy_entity_limit: int = int(SettingsData.eggnemy_cap)
+        self._eggnemy_kills_boss_trigger: int = int(
+            SettingsData.boss_spawn_counter)
 
         # game state
         self._is_game_over: bool = False
@@ -45,20 +88,36 @@ class Model():
         self._egg: Egg = Egg(EggConfig(
             hitbox=Hitbox(
                 _coordinate=CartesianPoint(
-                    (self.screen_width - egg_config._width) // 2,
-                    (self.screen_height - egg_config._height) // 2,
+                    (self.screen_width - int(EggSpecificData.egg_width)) // 2,
+                    (self.screen_height - int(EggSpecificData.egg_height)) // 2,
                 ),
-                _width=egg_config._width,
-                _height=egg_config._height
+                _width=int(EggSpecificData.egg_width),
+                _height=int(EggSpecificData.egg_height)
             ),
-            movement_speed=egg_config.movement_speed,
-            max_health=egg_config.max_health,
-            base_damage=egg_config.base_damage,
-            damage_hitbox_scale=egg_config.damage_hitbox_scale,
-            invincibility_frames=egg_config.invincibility_frames,
+            movement_speed=EggSpecificData.movement_speed,
+            max_health=EggSpecificData.egg_health,
+            base_damage=EggSpecificData.base_damage,
+            damage_hitbox_scale=EggSpecificData.damage_hitbox_scale,
+            invincibility_frames=EggSpecificData.invincibility_frames,
         ))
-        self._eggnemy_config: InitEggConfig = eggnemy_config
-        self._boss_eggnemy_config: InitEggConfig = boss_eggnemy_config
+        self._eggnemy_config: InitEggConfig = InitEggConfig(
+            _width=EggnemySpecificData.eggnemy_width,
+            _height=EggnemySpecificData.eggnemy_height,
+            movement_speed=EggnemySpecificData.movement_speed,
+            max_health=EggnemySpecificData.eggnemy_health,
+            base_damage=EggnemySpecificData.base_damage,
+            damage_hitbox_scale=EggnemySpecificData.damage_hitbox_scale,
+            invincibility_frames=EggnemySpecificData.invincibility_frames,
+        )
+        self._boss_eggnemy_config: InitEggConfig = InitEggConfig(
+            _width=BossEggnemySpecificData.boss_width,
+            _height=BossEggnemySpecificData.boss_height,
+            movement_speed=BossEggnemySpecificData.movement_speed,
+            max_health=BossEggnemySpecificData.boss_health,
+            base_damage=BossEggnemySpecificData.base_damage,
+            damage_hitbox_scale=BossEggnemySpecificData.damage_hitbox_scale,
+            invincibility_frames=BossEggnemySpecificData.invincibility_frames,
+        )
         self._eggnemy_list: EggnemyList = EggnemyList(
             _eggnemy_list={}
         )
@@ -78,7 +137,8 @@ class Model():
             test_egg = Hitbox(CartesianPoint(
                 x, y), self._eggnemy_config._width, self._eggnemy_config._height)
             # breakpoint()
-            if not self._egg._is_dead and abs(self._egg._get_vector_to_hitbox(test_egg)) > self._safe_radius and self._is_hitbox_in_bounds(test_egg):
+            if not self._egg._is_dead and abs(self._egg._get_vector_to_hitbox(test_egg)) > self._safe_radius and \
+                    self._is_hitbox_in_bounds(test_egg):
                 break
         return CartesianPoint(x, y)
 
@@ -213,7 +273,7 @@ class Model():
         elif not self._no_boss_generated and self._boss_id is not None:
             try:
                 self._eggnemy_list.eggnemy_list[self._boss_id]
-            except:
+            except KeyError:
                 print("you win")
                 self._is_game_over = True
                 return

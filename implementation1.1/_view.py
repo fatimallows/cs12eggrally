@@ -82,16 +82,6 @@ class View:
         pyxel.text(x_timer, y, timer_text, 7, None)
         pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
 
-    # def draw_win(self, egg_hitbox: Hitbox) -> None:
-    #     text: str = "YOU WIN !"
-    #     text_width: int = len(text)
-
-    #     padding = 2
-    #     text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
-    #     text_y = egg_hitbox.y - egg_hitbox.height - padding
-
-    #     pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
-
     def draw_end(self, egg_hitbox: Hitbox, text: str) -> None:
         box_width = 100
         box_height = 40
