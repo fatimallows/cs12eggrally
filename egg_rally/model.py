@@ -237,8 +237,11 @@ class Model():
         if eggnemy.is_dead:
             self._eggnemies_killed += 1
 
-    def _add_to_leaderboard(self):
-        if self._egg.is_dead or self._is_time_recorded:
+    def _add_to_leaderboard(self, keybinds: Keybinds) -> None:
+        if self._egg.is_dead:
+            return
+
+        if self._is_time_recorded:
             return
 
         self._is_time_recorded = True
@@ -254,8 +257,8 @@ class Model():
             save_leaderboard(self._leaderboard)
 
         if self.is_game_over:
+            self._add_to_leaderboard(keybinds)
             if keybinds.restart:
-                self._add_to_leaderboard()
                 self.restart()
             return
 
