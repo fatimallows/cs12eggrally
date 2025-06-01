@@ -10,7 +10,7 @@ from egg_rally.helpers import (CartesianPoint, Vector)
 
 
 class Egg(ABC):
-    def __init__(self, egg_config: EggConfig) -> None:
+    def __init__(self, egg_config: EggConfig, xp_threshold: int | None):
         self._hitbox: Hitbox = egg_config.hitbox
         self._movement_speed: float = egg_config.movement_speed
         self._max_health: float = egg_config.max_health
@@ -19,6 +19,9 @@ class Egg(ABC):
         self._damage_hitbox_scale: float = egg_config.damage_hitbox_scale
         self._invincibility_frames: int = egg_config.invincibility_frames
         self._i_frame_counter: int = 0
+        # eggxperience shi
+        self._eggxperience: int = 0
+        self.xp_threshold = xp_threshold
 
         self._center_to_corner_vector: Vector = Vector(
             x_hat=self._hitbox.width / 2,
@@ -79,6 +82,19 @@ class Egg(ABC):
         if self.health <= 0:
             self._is_dead = True
 
+    def apply_egghancement(self, choice: int) -> None:
+        """
+            choice:
+            1 - Increase max HP
+            2 - Increase attack
+            3 - Increase speed
+        """
+        hp_inc = self._egghancement_hp if choice == 1 else 0
+        atk_inc = self._egghancement_atk if choice == 2 else 0
+        spd_inc = self._egghancement_spd if choice == 3 else 0
+        self._egg.apply_egghancement(choice, hp_inc, atk_inc, spd_inc)
+        self._should_trigger_egghancement = False
+
     def _get_vector_to_hitbox(self, hitbox_target: Hitbox) -> Vector:
         """Simply get the x and y distance of the two objects and slap them on a vector.
 
@@ -115,6 +131,17 @@ class Egg(ABC):
     def move(self, velocity_vector: Vector) -> None:
         pass
 
+    def gain_eggxperience(self, amount: int = 1) -> None:
+        self._eggxperience += amount
+
+    @property
+    def eggxperience(self) -> int:
+        return self._eggxperience
+
+    @eggxperience.setter
+    def eggxperience(self, value):
+        self._eggxperience = value
+
     @property
     def hitbox(self) -> Hitbox:
         return self._hitbox
@@ -146,7 +173,7 @@ class Egg(ABC):
 
 class Eggnemy(Egg):
     def __init__(self, egg_config: EggConfig, egg_target: EggEntity):
-        super().__init__(egg_config)
+        super().__init__(egg_config, xp_threshold=None)
         self._target_egg: EggEntity = egg_target
         self.test_only_move_velocity = Vector(0, 0)
 

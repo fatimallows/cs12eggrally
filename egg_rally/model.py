@@ -56,7 +56,7 @@ class BossEggnemySpecificData:
 
 
 class Model():
-    def __init__(self, fps: float, screen_width: float, screen_height: float, world_width: float, world_height: float) -> None:
+    def __init__(self, fps: float, screen_width: float, screen_height: float, world_width: float, world_height: float, xp_threshold=5, egghancement_hp=1, egghancement_atk=1, egghancement_spd=1):
         # world definitions
         self._fps: int = int(fps)
         self._screen_width: int = int(screen_width)
@@ -87,6 +87,15 @@ class Model():
         self._is_time_recorded: bool = False
 
         self._leaderboard: list[int | float] = list(load_leaderboard())
+        self.xp_threshold = xp_threshold
+        self._egghancement_hp = egghancement_hp
+        self._egghancement_atk = egghancement_atk
+        self._egghancement_spd = egghancement_spd
+        self._should_trigger_egghancement = False
+        self.in_enhancement_menu = False
+        self.enhancement_options = [
+            "[1] +10 Max HP", "[2] +1 Attack", "[3] +0.5 Speed"]
+        self.selected_enhancement_index = 0
 
         # entities
         self._egg: Egg = Egg(EggConfig(
@@ -103,7 +112,7 @@ class Model():
             base_damage=EggSpecificData.base_damage,
             damage_hitbox_scale=EggSpecificData.damage_hitbox_scale,
             invincibility_frames=EggSpecificData.invincibility_frames,
-        ))
+        ), xp_threshold=self.xp_threshold)
         self._eggnemy_config: InitEggConfig = InitEggConfig(
             _width=EggnemySpecificData.eggnemy_width,
             _height=EggnemySpecificData.eggnemy_height,
@@ -238,6 +247,20 @@ class Model():
 
         if eggnemy.is_dead:
             self._eggnemies_killed += 1
+            self._egg.gain_eggxperience(1)
+            if self._egg.eggxperience >= self.xp_threshold:
+                self._should_trigger_egghancement = True
+
+    def apply_enhancement(self, choice: int):
+        if choice == 0:  # Max HP
+            self.egg._max_health += 10
+            self.egg._health += 10
+        elif choice == 1:  # Attack
+            self.egg._base_damage += 1
+        elif choice == 2:  # Speed
+            self.egg._movement_speed += 0.5
+
+        self.in_enhancement_menu = False
 
     def _add_to_leaderboard(self, keybinds: Keybinds) -> None:
         if self._egg.is_dead:
@@ -300,12 +323,20 @@ class Model():
                 self.restart()
             return
 
-        # print("leaderboard", self._leaderboard, end="")
+        if self.in_enhancement_menu:
+            return  # skip all updates (egg, enemies, timer, etc.)
+
         # generate or regenerate eggnemies
         self._generate_eggnemies()
 
         # move time by one
         self._elapsed_frames += 1
+
+        # check for egghancement kinemeshit
+        if self.egg.eggxperience >= self.egg.xp_threshold:
+            self.in_enhancement_menu = True
+            self.egg.eggxperience = 0
+            self.egg.xp_threshold += 15  # or whatever increment
 
         # movement
         if keybinds.x_one_pressed:
@@ -434,6 +465,11 @@ class Model():
     @property
     def leaderboard(self) -> list[int | float]:
         return self._leaderboard
+
+    @property
+    def should_trigger_egghancement(self) -> bool:
+        return self._should_trigger_egghancement
+
 # model = Model(
 #     fps=30,
 #     screen_width=200,
