@@ -163,6 +163,8 @@ class Keybinds:
     left: bool
     right: bool
     attack: bool
+    restart: bool
+    quit: bool
 
     @property
     def y_one_pressed(self) -> bool:

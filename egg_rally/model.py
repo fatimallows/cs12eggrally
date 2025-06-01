@@ -4,14 +4,14 @@ from dataclasses import dataclass
 
 import itertools
 
-from egg_rally.leaderboard import load_leaderboard
+from egg_rally.leaderboard import load_leaderboard, save_leaderboard
 from egg_rally.project_types import Hitbox, Keybinds, InitEggConfig, EggInfo
 from egg_rally.helpers import CartesianPoint, Vector
 from egg_rally.egg_entities import EggConfig, Egg, Eggnemy, EggnemyType, EggnemyTag, EggnemyList
 from egg_rally.extract_json import json_handler
 
 _settings = json_handler(
-    'implementation1.1/_settings.json').extract_settings('all')
+    'egg_rally/settings.json').extract_settings('all')
 
 
 @dataclass(frozen=True)
@@ -56,9 +56,9 @@ class BossEggnemySpecificData:
 
 
 class Model():
-    def __init__(self, screen_width: float, screen_height: float, world_width: float, world_height: float) -> None:
+    def __init__(self, fps: float, screen_width: float, screen_height: float, world_width: float, world_height: float) -> None:
         # world definitions
-        self._fps: int = int(SettingsData.fps)
+        self._fps: int = int(fps)
         self._screen_width: int = int(screen_width)
         self._screen_height: int = int(screen_height)
         self._world_width: int = int(world_width)
@@ -77,16 +77,16 @@ class Model():
             SettingsData.boss_spawn_counter)
 
         # game state
+        self._stop_game: bool = False
         self._is_game_over: bool = False
         self._elapsed_frames: int = 0
         self._eggnemies_killed: int = 0
         self._no_boss_generated: bool = True
         self._boss_id: int | None = None
         self._is_boss_alive: bool | None = None
-        if leaderboard is None:
-            self._leaderboard = load_leaderboard()
-        else:
-            self._leaderboard = leaderboard
+        self._is_time_recorded: bool = False
+
+        self._leaderboard: list[int] = load_leaderboard()
 
         # entities
         self._egg: Egg = Egg(EggConfig(
@@ -125,6 +125,33 @@ class Model():
         self._eggnemy_list: EggnemyList = EggnemyList(
             _eggnemy_list={}
         )
+
+    def restart(self) -> None:
+        self._is_game_over: bool = False
+        self._elapsed_frames: int = 0
+        self._eggnemies_killed: int = 0
+        self._no_boss_generated: bool = True
+        self._boss_id: int | None = None
+        self._is_boss_alive: bool | None = None
+        self._is_time_recorded: bool = False
+        self._eggnemy_list: EggnemyList = EggnemyList(
+            _eggnemy_list={}
+        )
+        self._egg: Egg = Egg(EggConfig(
+            hitbox=Hitbox(
+                _coordinate=CartesianPoint(
+                    (self.screen_width - int(EggSpecificData.egg_width)) // 2,
+                    (self.screen_height - int(EggSpecificData.egg_height)) // 2,
+                ),
+                _width=int(EggSpecificData.egg_width),
+                _height=int(EggSpecificData.egg_height)
+            ),
+            movement_speed=EggSpecificData.movement_speed,
+            max_health=EggSpecificData.egg_health,
+            base_damage=EggSpecificData.base_damage,
+            damage_hitbox_scale=EggSpecificData.damage_hitbox_scale,
+            invincibility_frames=EggSpecificData.invincibility_frames,
+        ))
 
     def _is_hitbox_in_bounds(self, hitbox: Hitbox) -> bool:
         # breakpoint()
@@ -210,11 +237,29 @@ class Model():
         if eggnemy.is_dead:
             self._eggnemies_killed += 1
 
-    def update(self, keybinds: Keybinds) -> None:
-        # game over check
-        if self.is_game_over:
+    def _add_to_leaderboard(self):
+        if self._egg.is_dead or self._is_time_recorded:
             return
 
+        self._is_time_recorded = True
+        time: float = self._elapsed_frames / self.fps
+        self._leaderboard.append(time)
+        self._leaderboard.sort()
+
+    def update(self, keybinds: Keybinds) -> None:
+        # game over check
+        if keybinds.quit:
+            self._stop_game = True
+            self._leaderboard = self._leaderboard[:3]  # truncate to top three
+            save_leaderboard(self._leaderboard)
+
+        if self.is_game_over:
+            if keybinds.restart:
+                self._add_to_leaderboard()
+                self.restart()
+            return
+
+        # print("leaderboard", self._leaderboard, end="")
         # generate or regenerate eggnemies
         self._generate_eggnemies()
 
@@ -278,9 +323,12 @@ class Model():
             try:
                 self._eggnemy_list.eggnemy_list[self._boss_id]
             except KeyError:
-                print("you win")
                 self._is_game_over = True
                 return
+
+    @property
+    def stop_game(self) -> int:
+        return self._stop_game
 
     @property
     def fps(self) -> int:

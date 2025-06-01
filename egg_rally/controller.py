@@ -23,19 +23,21 @@ class Controller():
             left=pyxel.btn(pyxel.KEY_A),
             right=pyxel.btn(pyxel.KEY_D),
             attack=pyxel.btn(pyxel.KEY_L),
+            restart=pyxel.btnp(pyxel.KEY_R),
+            quit=pyxel.btnp(pyxel.KEY_Q),
         )
-        if pyxel.btnp(pyxel.KEY_Q):  # quit
-            self.reset_leaderboard()
-            pyxel.quit()
         if self._model.is_game_over and not self._model.egg.is_dead:
             self._view.draw_end(self._model.egg.hitbox, "YOU WIN")
-            if self._model.elapsed_frames > 0:
-                self._record_leaderboard_entry(self._model.elapsed_frames)
+            # if self._model.elapsed_frames > 0:
+            #     self._record_leaderboard_entry(self._model.elapsed_frames)
 
-        if self._model.is_game_over and pyxel.btnp(pyxel.KEY_R):
-            self._restart_game()
-            return
+            # if self._model.is_game_over and pyxel:
+            #     self._restart_game()
+            #     return
         self._model.update(keybinds)
+
+        if self._model.stop_game:
+            pyxel.quit()
 
     def draw(self):
         self._view.clear_screen()
@@ -78,16 +80,3 @@ class Controller():
         # self._view.draw_hitbox(eggnemy._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(eggnemy.hitbox, pyxel.COLOR_GRAY)
         self._view.draw_health(eggnemy, 8)
-
-    def _restart_game(self):
-        self._init_from_settings(self._settings)
-
-    def _record_leaderboard_entry(self, time_in_frames: int):
-        self._model._leaderboard.append(time_in_frames)
-        self._model._leaderboard = sorted(self._model._leaderboard)[
-            :3]  # lmao the emoji keep top 3
-        save_leaderboard(self._model._leaderboard)
-
-    def reset_leaderboard(self):
-        self._model._leaderboard = []
-        save_leaderboard(self._model._leaderboard)

@@ -84,7 +84,6 @@ class View:
         pyxel.text(x_timer, y, timer_text, 7, None)
         pyxel.text(x_eggnemies_killed, 2 * y, eggnemies_killed_text, 7, None)
 
-<<<<<<< HEAD:egg_rally/view.py
     def draw_leaderboard(self, leaderboard: list[int]):
         padding = 5
         line_height = 10
@@ -98,37 +97,15 @@ class View:
             y = start_y + (i + 1) * line_height
             if i < len(leaderboard):
                 time = leaderboard[i]
-                total_seconds = time // self._fps
-                minutes = total_seconds // 60
-                seconds = total_seconds % 60
+                # total_seconds = time / self._fps
+                minutes = time // 60
+                seconds = time - (minutes * 60)
+                seconds = 0 if seconds < 0 else int(seconds)
                 time_str = f"{minutes:02}:{seconds:02}"
             else:
                 time_str = "--:--"
             pyxel.text(padding, y, f"  {i+1}  {time_str}", pyxel.COLOR_WHITE)
 
-    # def draw_win(self, egg_hitbox: Hitbox) -> None:
-    #     text: str = "YOU WIN !"
-    #     text_width: int = len(text)
-
-    #     padding = 2
-    #     text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
-    #     text_y = egg_hitbox.y - egg_hitbox.height - padding
-
-    #     pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
-
-||||||| 6244403:implementation1.1/_view.py
-    # def draw_win(self, egg_hitbox: Hitbox) -> None:
-    #     text: str = "YOU WIN !"
-    #     text_width: int = len(text)
-
-    #     padding = 2
-    #     text_x = egg_hitbox.x + ((egg_hitbox.width - text_width) // 2)
-    #     text_y = egg_hitbox.y - egg_hitbox.height - padding
-
-    #     pyxel.text(text_x, text_y, text, pyxel.COLOR_YELLOW, None)  # white
-
-=======
->>>>>>> phase_3_python_mvc:implementation1.1/_view.py
     def draw_end(self, egg_hitbox: Hitbox, text: str) -> None:
         box_width = 100
         box_height = 40
