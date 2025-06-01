@@ -34,24 +34,22 @@ class Hitbox(ABC):
     _width: float
     _height: float
 
-    def is_touching(self, point: Vector):
+    def is_touching(self, point: Vector) -> bool:
         center_to_corner_vector: Vector = self._coordinate.convert_to_vector() - \
             self.center.convert_to_vector()
         # breakpoint()
         return abs(point.x_hat) <= abs(center_to_corner_vector.x_hat) and (
             abs(point.y_hat) <= abs(center_to_corner_vector.y_hat))
 
-    def is_will_touch(self, move_vector: Vector, check_hitbox: Hitbox) -> tuple[bool, bool]:
-        check_x = self._coordinate.x + move_vector.x_hat
-        check_y = self._coordinate.y + move_vector.y_hat
+    def is_touching_hitbox(self, other: Hitbox) -> bool:
+        for point in self.quadrants:
+            if other.is_point_in_hitbox(point):
+                return True
 
-        return (
-            self._is_within(check_hitbox.left, check_x, check_hitbox.right),
-            self._is_within(check_hitbox.top, check_y, check_hitbox.bottom)
-        )
+        return False
 
-    def _is_within(self, left: float, check: float, right: float) -> bool:
-        return left <= check and check <= right
+    def is_point_in_hitbox(self, point: CartesianPoint) -> list[bool]:
+        return (self.left <= point.x <= self.right) and (self.top <= point.y <= self.bottom)
 
     @property
     def width(self) -> float:
@@ -101,6 +99,26 @@ class Hitbox(ABC):
     @y.setter
     def y(self, val: float):
         self._coordinate.y = val
+
+    @property
+    def quad_1(self):
+        return CartesianPoint(self.right, self.top)
+
+    @property
+    def quad_2(self):
+        return self._coordinate
+
+    @property
+    def quad_3(self):
+        return CartesianPoint(self.left, self.bottom)
+
+    @property
+    def quad_4(self):
+        return CartesianPoint(self.right, self.bottom)
+
+    @property
+    def quadrants(self) -> tuple[CartesianPoint, CartesianPoint, CartesianPoint, CartesianPoint]:
+        return (self.quad_1, self.quad_2, self.quad_3, self.quad_4)
 
 
 @dataclass(frozen=True)

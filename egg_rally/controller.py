@@ -6,6 +6,8 @@ from egg_rally.egg_entities import Eggnemy
 from egg_rally.view import View
 from egg_rally.leaderboard import save_leaderboard
 
+from egg_rally.helpers import Vector, CartesianPoint
+
 
 class Controller():
     def __init__(self, model: Model, view: View):
@@ -80,3 +82,12 @@ class Controller():
         # self._view.draw_hitbox(eggnemy._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(eggnemy.hitbox, pyxel.COLOR_GRAY)
         self._view.draw_health(eggnemy, 8)
+
+        # c1 = eggnemy.hitbox.center
+        # v = eggnemy.test_only_move_velocity
+        # c2 = c1.convert_to_vector() + v * 20
+        # pyxel.line(c1.x, c1.y, c2.x_hat, c2.y_hat, pyxel.COLOR_YELLOW)
+        # pyxel.text(
+        #     c1.x + 5, c1.y, f"{((eggnemy.test_only_move_velocity.x_hat * 1000) // 10) / 100}", pyxel.COLOR_YELLOW, None)
+        # pyxel.text(
+        #     c1.x, c1.y - 5, f"{((eggnemy.test_only_move_velocity.y_hat * 1000) // 10) / 100}", pyxel.COLOR_YELLOW, None)

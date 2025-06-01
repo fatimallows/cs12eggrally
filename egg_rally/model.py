@@ -26,7 +26,7 @@ class EggSpecificData:
     egg_health: float = _settings['egg_health']
     egg_width: float = _settings['egg_width']
     egg_height: float = _settings['egg_height']
-    movement_speed: float = 2
+    movement_speed: float = 3
     base_damage: float = 1
     damage_hitbox_scale: float = 2
     invincibility_frames: int = int(
@@ -49,8 +49,8 @@ class BossEggnemySpecificData:
     boss_health: float = _settings['boss_health']
     boss_width: float = _settings['boss_width']
     boss_height: float = _settings['boss_height']
-    movement_speed: float = 0.5
-    base_damage: float = 1
+    movement_speed: float = 1
+    base_damage: float = 3
     damage_hitbox_scale: float = 1
     invincibility_frames: int = 0
 
@@ -226,6 +226,7 @@ class Model():
     def _move_all(self, move_vector: Vector) -> Callable:
         def _f(eggnemy: Eggnemy) -> None:
             move = self._modified_individual_eggnemy_move(eggnemy, move_vector)
+            # eggnemy.move(move)
             eggnemy.move(move)
 
         return _f
@@ -251,24 +252,40 @@ class Model():
         self._leaderboard.sort()
 
     def _modified_individual_eggnemy_move(self, curr_eggnemy: Eggnemy, move_vector: Vector) -> Vector:
-        move_x = True
-        move_y = True
+        # move_x = True
+        # move_y = True
+
+        egg_tracking = curr_eggnemy.track_vector
+
         for key in self._eggnemy_list.eggnemy_list:
-            if curr_eggnemy is self._eggnemy_list.eggnemy_list[key]:
+            if curr_eggnemy is self._eggnemy_list.eggnemy_list[key].eggnemy:
                 continue
 
-            is_will_touch = curr_eggnemy.hitbox.is_will_touch(
-                move_vector,
-                # what the fuck was I ON
-                self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox
-            )
-            move_x = move_x and is_will_touch[0]
-            move_y = move_y and is_will_touch[1]
+            curr_hitbox = curr_eggnemy.hitbox
 
-        return Vector(
-            move_vector.x_hat if move_x else 0,
-            move_vector.y_hat if move_y else 0
-        )
+            projected_move = Hitbox(CartesianPoint(curr_hitbox.x + egg_tracking.x_hat,
+                                                   curr_hitbox.y + egg_tracking.y_hat), curr_hitbox.width, curr_hitbox.height)
+
+            if projected_move.is_touching_hitbox(self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox):
+                return (projected_move.center.convert_to_vector() - self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox.center.convert_to_vector()) * 0.065 * (curr_eggnemy.movement_speed ** 1.5) + move_vector
+            # x_move = Hitbox(CartesianPoint(curr_hitbox.x + egg_tracking.x_hat,
+            #                 curr_hitbox.y), curr_hitbox.width, curr_hitbox.height)
+            # y_move = Hitbox(CartesianPoint(curr_hitbox.x, curr_hitbox.y +
+            #                 egg_tracking.y_hat), curr_hitbox.width, curr_hitbox.height)
+
+            # move_x = move_x and not x_move.is_touching_hitbox(
+            #     self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox)
+            # move_y = move_y and not y_move.is_point_in_hitbox(
+            #     self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox)
+
+            # if move_x or move_y is True:
+            #     # breakpoint()
+            #     pass
+        return move_vector
+        # return Vector(
+        #     -(egg_tracking * 2).x_hat if not move_x else 0,
+        #     -(egg_tracking * 2).y_hat if not move_y else 0
+        # ) + move_vector
 
     def update(self, keybinds: Keybinds) -> None:
         # game over check

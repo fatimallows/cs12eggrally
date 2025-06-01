@@ -148,6 +148,7 @@ class Eggnemy(Egg):
     def __init__(self, egg_config: EggConfig, egg_target: EggEntity):
         super().__init__(egg_config)
         self._target_egg: EggEntity = egg_target
+        self.test_only_move_velocity = Vector(0, 0)
 
     def _get_tracking_vector(self) -> Vector:
         vector_to_egg: Vector = self._get_vector_to_hitbox(
@@ -164,6 +165,8 @@ class Eggnemy(Egg):
 
         move_vector: Vector = velocity_vector + self._get_tracking_vector()
 
+        self.test_only_move_velocity = self._get_tracking_vector()
+
         self._damage_hitbox.x += move_vector.x_hat
         self._damage_hitbox.y += move_vector.y_hat
         self._hitbox.x += move_vector.x_hat
@@ -171,7 +174,7 @@ class Eggnemy(Egg):
 
     @property
     def track_vector(self) -> Vector:
-        return self._get_tracking_vector(self)
+        return self._get_tracking_vector()
 
     def get_vector_to_hitbox(self, hitbox_target: Hitbox) -> Vector:
         return super()._get_vector_to_hitbox(hitbox_target)
