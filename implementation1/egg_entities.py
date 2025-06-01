@@ -5,7 +5,7 @@ from project_types import (
 
 
 class Entity(ABC):
-    """Entities are any objects in the game that can move around, fight, and bleed.
+    """Entities are any objects in the game that can fight, and bleed.
     All entities have a rectangle hitbox, just so we can have freedom in what
     we can use as the sprite"""
     def __init__(self, entity_config: EntityConfig, fps: int, width: int, height: int) -> None:
@@ -23,10 +23,6 @@ class Entity(ABC):
         self._model_height = height
         
         self._is_dead = False
-        
-    @abstractmethod
-    def move(self, positionVector: Vector) -> None:
-        raise NotImplementedError
     
     def tick(self) -> None:
         """anything that requires to be done every frame is done here"""
@@ -159,14 +155,7 @@ class EggEntity(Entity):
     def attack_eggnemy(self, target: 'EggnemyEntity') -> None:
         if self.get_distance_to(target) <= self.attack_radius:
             target.take_damage(self)
-        
-    def move(self, direction_vector: Vector) -> None:
-        delta_x: float = direction_vector.x_hat * self._movement_speed
-        delta_y: float = direction_vector.y_hat * self._movement_speed
-        
-        self._x += delta_x if 0 <= self.left + delta_x and self.right + delta_x < self._model_width else 0
-        self._y += delta_y if 0 <= self.top + delta_y and self.bottom + delta_y < self._model_height else 0
-    
+            
     def _tick_invincibility_timer(self) -> None:
         self.invincibility_timer -= 1 if self.invincibility_timer > 0 else 0
         
@@ -180,6 +169,7 @@ class EggnemyEntity(Entity):
                  entity_config: EntityConfig, fps: int, width: int, height: int, 
                  target_egg: EggEntity) -> None:
         super().__init__(entity_config, fps, width, height)   
+<<<<<<< HEAD
         self.target_egg = target_egg
         self.base_health = 2
         self.max_health = 2
@@ -214,24 +204,36 @@ class BossEntity(Entity):
         self.base_health = 100
         self.max_health = 100
         self.base_damage = 3
+=======
+        self.target_egg: EggEntity = target_egg
+        self._offset_vector: Vector = Vector(0, 0) 
+
+    def set_offset_vector(self, vector: Vector):
+        self._offset_vector = vector
+>>>>>>> 62444033178977a8dda0cd316888e59fb533f7f5
         
     def attack_egg(self, target: EggEntity) -> None:
         if self.is_in_collission(target):
             target.take_damage(self)
-            
+    
     def move(self, vector_to_egg: Vector) -> None:
-        try:
-            direction_vector: Vector = vector_to_egg / abs(vector_to_egg)
-        except:
-            direction_vector = Vector(0,0)
-        velocity_vector: Vector = direction_vector * self._movement_speed
-        self._x += velocity_vector.x_hat
-        self._y += velocity_vector.y_hat
+        # self._move_pathfinding(vector_to_egg)
+        
+        move_vector = self._offset_vector + vector_to_egg
+        self._x += move_vector.x_hat
+        self._y += move_vector.y_hat
         
     def tick(self) -> None:
         super().tick()
         if self._is_dead:
             return
+        
         vector_to_egg: Vector = self.get_distance_vector_to(self.target_egg)
+        try:
+            vector_to_egg = vector_to_egg / abs(vector_to_egg)
+        except ZeroDivisionError:
+            vector_to_egg = Vector(0, 0)
+            
         self.attack_egg(self.target_egg)
-        self.move(vector_to_egg)
+        self.move(vector_to_egg * self._movement_speed)
+        # print(vector_to_egg * self._movement_speed)
