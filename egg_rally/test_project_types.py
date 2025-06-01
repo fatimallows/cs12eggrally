@@ -294,8 +294,119 @@ class TestHitbox:
         assert not hitbox_neg_pos_dim.is_touching(Vector(1.1, 0.0))
         assert not hitbox_neg_pos_dim.is_touching(Vector(0.0, 1.1))
 
-    # def is_point_in_hitbox(self):
-    #     coordinate_pos = CartesianPoint(0.0, 0.0)
+    def is_touching_hitbox(self):
+        coordinate_pos = CartesianPoint(0.0, 0.0)
+        hitbox_pos = Hitbox(_coordinate=coordinate_pos,
+                            _width=2.0, _height=2.0)
+
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-3, -3), hitbox_pos.width, hitbox_pos.height))
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-3, 0), hitbox_pos.width, hitbox_pos.height))
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-3, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(0, -3), hitbox_pos.width, hitbox_pos.height))
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(0, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, -3), hitbox_pos.width, hitbox_pos.height))
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, 0), hitbox_pos.width, hitbox_pos.height))
+        assert not hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-1, -1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-1, 1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(-1, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(1, -1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(1, 1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(1, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, -1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, 1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(3, 3), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(0, 0)), hitbox_pos.width, hitbox_pos.height)
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(1, 0), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(2, 0), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(0, 1), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(2, 1), hitbox_pos.width, hitbox_pos.height))
+
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(0, 2), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(1, 2), hitbox_pos.width, hitbox_pos.height))
+        assert hitbox_pos.is_touching_hitbox(
+            Hitbox(CartesianPoint(2, 2), hitbox_pos.width, hitbox_pos.height))
+
+    def is_point_in_hitbox(self):
+        coordinate_pos = CartesianPoint(0.0, 0.0)
+        hitbox_pos = Hitbox(_coordinate=coordinate_pos,
+                            _width=2.0, _height=2.0)  # Center at (1, 1)
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(-1, -1))
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(-1, 1))
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(-1, 3))
+
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(1, -1))
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(1, 1))
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(1, 3))
+
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(3, -1))
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(3, 1))
+        assert not hitbox_pos.is_point_in_hitbox(CartesianPoint(3, 3))
+
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(0, 0))  # edges
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(1, 0))
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(2, 0))
+
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(0, 1))
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(2, 1))
+
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(0, 2))
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(1, 2))
+        assert hitbox_pos.is_point_in_hitbox(CartesianPoint(2, 2))
+
+        # assert hitbox_pos.is_touching(Vector(1.0, 1.0))
+        # assert hitbox_pos.is_touching(Vector(0.5, 0.5))
+        # assert hitbox_pos.is_touching(Vector(1.0, 1.0))  # Edge case
+        # assert not hitbox_pos.is_touching(Vector(1.1, 1.0))
+        # assert not hitbox_pos.is_touching(Vector(1.0, 1.1))
+
+        coordinate_zero = CartesianPoint(0.0, 0.0)
+        hitbox_zero = Hitbox(_coordinate=coordinate_zero,
+                             _width=0.0, _height=0.0)  # Center at (0, 0)
+        assert hitbox_zero.is_touching(Vector(0.0, 0.0))
+        assert not hitbox_zero.is_touching(Vector(0.1, 0.0))
+        assert not hitbox_zero.is_touching(Vector(0.0, 0.1))
+
+        coordinate_neg_pos_dim = CartesianPoint(-1.0, -1.0)
+        hitbox_neg_pos_dim = Hitbox(
+            # Center at (0, 0)
+            _coordinate=coordinate_neg_pos_dim, _width=2.0, _height=2.0)
+        assert hitbox_neg_pos_dim.is_touching(Vector(0.0, 0.0))
+        assert hitbox_neg_pos_dim.is_touching(Vector(0.5, -0.5))
+        assert hitbox_neg_pos_dim.is_touching(Vector(0.0, 0.0))  # Center
+        assert not hitbox_neg_pos_dim.is_touching(Vector(1.1, 0.0))
+        assert not hitbox_neg_pos_dim.is_touching(Vector(0.0, 1.1))
 
 
 class TestEggConfig:

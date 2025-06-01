@@ -10,8 +10,8 @@ class TestEgg:
                                max_health=25,
                                base_damage=1.0,
                                damage_hitbox_scale=1.0,
-                               invincibility_frames=30)
-        egg = Egg(egg_config)
+                               invincibility_frames=30,)
+        egg = Egg(egg_config, xp_threshold=5)
         assert egg.hitbox == hitbox
         assert egg.movement_speed == 2.0
         assert egg.max_health == 25
@@ -36,7 +36,7 @@ class TestEgg:
                                         base_damage=5.0,
                                         damage_hitbox_scale=1.0,
                                         invincibility_frames=30)
-        attacker_egg = Egg(egg_config_attacker)
+        attacker_egg = Egg(egg_config_attacker, xp_threshold=5)
 
         eggentityhitbox = Hitbox(CartesianPoint(4, 0), 3, 4)
         egg_config_target = EggConfig(hitbox=eggentityhitbox,
@@ -45,7 +45,7 @@ class TestEgg:
                                       base_damage=1.0,
                                       damage_hitbox_scale=1.0,
                                       invincibility_frames=10)
-        target_egg = Egg(egg_config_target)
+        target_egg = Egg(egg_config_target, xp_threshold=5)
 
         initial_target_health = target_egg.health
         attacker_egg.deal_damage(target_egg)
@@ -76,7 +76,7 @@ class TestEgg:
         hitbox = Hitbox(CartesianPoint(0, 0), 3, 4)
         egg_config = EggConfig(hitbox=hitbox, movement_speed=2.0, max_health=25.0,
                                base_damage=1.0, damage_hitbox_scale=1.0, invincibility_frames=2)
-        egg = Egg(egg_config)
+        egg = Egg(egg_config, xp_threshold=5)
 
         initial_health = egg.health
         damage_amount = 10.0
@@ -99,7 +99,7 @@ class TestEgg:
         egg_hitbox = Hitbox(CartesianPoint(0, 0), 2, 2)
         egg_config = EggConfig(hitbox=egg_hitbox, movement_speed=1.0, max_health=10.0,
                                base_damage=1.0, damage_hitbox_scale=1.0, invincibility_frames=0)
-        egg = Egg(egg_config)
+        egg = Egg(egg_config, xp_threshold=5)
 
         other_hitbox_above = Hitbox(CartesianPoint(0, -3), 1, 1)
         vector_above = egg._get_vector_to_hitbox(other_hitbox_above)
@@ -126,7 +126,7 @@ class TestEgg:
         hitbox = Hitbox(CartesianPoint(0, 0), 3, 4)
         egg_config = EggConfig(hitbox=hitbox, movement_speed=2.0, max_health=25.0,
                                base_damage=1.0, damage_hitbox_scale=1.0, invincibility_frames=2)
-        egg = Egg(egg_config)
+        egg = Egg(egg_config, xp_threshold=5)
         egg._i_frame_counter = 2
         egg.tick()
         assert egg._i_frame_counter == 1
