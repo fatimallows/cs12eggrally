@@ -1,8 +1,10 @@
 from __future__ import annotations
 from abc import ABC
 from typing import Protocol, Literal, Callable, Sequence
+from functools import cache
 
 import itertools
+
 
 type ObjectNode = ObjectBox | None
 type Dimensions = Literal['x'] | Literal['y']
@@ -199,6 +201,7 @@ class PyxelObjectModel:
         test = self._go_to_node_with_tag(tag, self._root)
         self.current_object = test if test is not None else self._root
 
+    @cache  # it slows to a crawl if it is not cached at all
     def _go_to_node_with_tag(self, tag: str, current_node: ObjectBox) -> ObjectBox | None:
         if tag in current_node.tags:
             return current_node

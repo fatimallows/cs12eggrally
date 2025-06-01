@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Callable
@@ -10,7 +10,7 @@ from egg_rally.helpers import (CartesianPoint, Vector)
 
 
 class Egg(ABC):
-    def __init__(self, egg_config: EggConfig):
+    def __init__(self, egg_config: EggConfig) -> None:
         self._hitbox: Hitbox = egg_config.hitbox
         self._movement_speed: float = egg_config.movement_speed
         self._max_health: float = egg_config.max_health
