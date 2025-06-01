@@ -23,6 +23,10 @@ def main(json_handler: json_handler_protocol) -> None:
     boss_health: float = _settings['boss_health']
     boss_width: float = _settings['boss_width']
     boss_height: float = _settings['boss_height']
+    xp_threshold: float=_settings["eggxperience_threshold"],
+    egghancement_hp: float =_settings["egghancement_max_hp_increase"],
+    egghancement_atk: float=_settings["egghancement_attack_increase"],
+    egghancement_spd: float =_settings["egghancement_speed_increase"]     
     
     model = Model(
         fps=fps,
@@ -58,7 +62,11 @@ def main(json_handler: json_handler_protocol) -> None:
             base_damage=3,
             damage_hitbox_scale=1,
             invincibility_frames=0
-            )        
+            ),
+        xp_threshold=xp_threshold,
+        egghancement_hp=egghancement_hp,
+        egghancement_atk=egghancement_atk,
+        egghancement_spd=egghancement_spd,     
     )
     view = View(screen_width=width,
         screen_height=height,

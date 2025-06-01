@@ -14,7 +14,7 @@ class Model():
     def __init__(self,
                  fps: int, screen_width: int, screen_height: int, world_width: int, world_height: int,
                  eggnemy_entity_limit: int, eggnemy_kills_boss_trigger: int,
-                 egg_config: InitEggConfig, eggnemy_config: InitEggConfig, boss_eggnemy_config: InitEggConfig, leaderboard: list[int] | None = None):
+                 egg_config: InitEggConfig, eggnemy_config: InitEggConfig, boss_eggnemy_config: InitEggConfig, leaderboard: list[int] | None = None, xp_threshold=5, egghancement_hp=1, egghancement_atk=1, egghancement_spd=1):
         # world definitions
         self._fps: int = fps
         self._screen_width: int = screen_width
@@ -44,6 +44,14 @@ class Model():
             self._leaderboard = load_leaderboard()
         else:
             self._leaderboard = leaderboard
+        self.xp_threshold = xp_threshold
+        self._egghancement_hp = egghancement_hp
+        self._egghancement_atk = egghancement_atk
+        self._egghancement_spd = egghancement_spd
+        self._should_trigger_egghancement = False
+        self.in_enhancement_menu = False
+        self.enhancement_options = ["[1] +10 Max HP", "[2] +1 Attack", "[3] +0.5 Speed"]
+        self.selected_enhancement_index = 0
 
         # entities
         self._egg: Egg = Egg(EggConfig(
@@ -60,7 +68,7 @@ class Model():
             base_damage=egg_config.base_damage,
             damage_hitbox_scale=egg_config.damage_hitbox_scale,
             invincibility_frames=egg_config.invincibility_frames,
-        ))
+        ), xp_threshold=self.xp_threshold)
         self._eggnemy_config: InitEggConfig = eggnemy_config
         self._boss_eggnemy_config: InitEggConfig = boss_eggnemy_config
         self._eggnemy_list: EggnemyList = EggnemyList(
@@ -149,17 +157,39 @@ class Model():
 
         if eggnemy.is_dead:
             self._eggnemies_killed += 1
+            self._egg.gain_eggxperience(1)
+            if self._egg.eggxperience >= self.xp_threshold:
+                self._should_trigger_egghancement = True
 
+    def apply_enhancement(self, choice: int):
+        if choice == 0:  # Max HP
+            self.egg._max_health += 10
+            self.egg._health += 10
+        elif choice == 1:  # Attack
+            self.egg._base_damage += 1
+        elif choice == 2:  # Speed
+            self.egg._movement_speed += 0.5
+
+        self.in_enhancement_menu = False
     def update(self, keybinds: Keybinds) -> None:
         # game over check
         if self.is_game_over:
             return
+
+        if self.in_enhancement_menu:
+            return  # skip all updates (egg, enemies, timer, etc.)
 
         # generate or regenerate eggnemies
         self._generate_eggnemies()
 
         # move time by one
         self._elapsed_frames += 1
+
+        # check for egghancement kinemeshit
+        if self.egg.eggxperience >= self.egg.xp_threshold:
+            self.in_enhancement_menu = True
+            self.egg.eggxperience = 0
+            self.egg.xp_threshold += 15  # or whatever increment
 
         # movement
         if keybinds.x_one_pressed:
@@ -207,7 +237,7 @@ class Model():
 
         if self._egg.is_dead:
             self._is_game_over = True
-
+    
         if self._eggnemies_killed >= self._eggnemy_kills_boss_trigger and self._no_boss_generated:
             self._generate_boss()
             self._no_boss_generated = False
@@ -285,6 +315,11 @@ class Model():
     @property
     def leaderboard(self) -> list[int]:
         return self._leaderboard
+
+    @property
+    def should_trigger_egghancement(self) -> bool:
+        return self._should_trigger_egghancement
+
 # model = Model(
 #     fps=30,
 #     screen_width=200,

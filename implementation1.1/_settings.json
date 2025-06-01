@@ -16,5 +16,13 @@
     "boss_spawn_counter": 1,
     "boss_health": 30,
     "boss_width": 10,
-    "boss_height": 10
+    "boss_height": 10,
+
+    "eggxperience_threshold": 5,
+    "egghancement_max_hp_increase": 1,
+    "egghancement_attack_increase": 1,
+    "egghancement_speed_increase": 1
+
+
+
 }

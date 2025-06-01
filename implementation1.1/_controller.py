@@ -55,6 +55,10 @@ class Controller():
                 damage_hitbox_scale=1,
                 invincibility_frames=0,
             ),
+            xp_threshold=settings['eggxperience_threshold'],
+            egghancement_hp=settings['egghancement_max_hp_increase'],
+            egghancement_atk=settings['egghancement_attack_increase'],
+            egghancement_spd=settings['egghancement_speed_increase'],  
         )
         self._view = View(
             screen_width=settings['screen_width'],
@@ -80,6 +84,22 @@ class Controller():
             right=pyxel.btn(pyxel.KEY_D),
             attack=pyxel.btn(pyxel.KEY_L),
         )
+
+        # eggahancement
+        if self._model.in_enhancement_menu:
+            if pyxel.btnp(pyxel.KEY_W):
+                self._model.selected_enhancement_index = (self._model.selected_enhancement_index - 1) % len(self._model.enhancement_options)
+            elif pyxel.btnp(pyxel.KEY_S):
+                self._model.selected_enhancement_index = (self._model.selected_enhancement_index + 1) % len(self._model.enhancement_options)
+
+            if pyxel.btnp(pyxel.KEY_1):
+                self._model.apply_enhancement(0)
+            elif pyxel.btnp(pyxel.KEY_2):
+                self._model.apply_enhancement(1)
+            elif pyxel.btnp(pyxel.KEY_3):
+                self._model.apply_enhancement(2)
+
+        
         if pyxel.btnp(pyxel.KEY_Q):  # quit
             self.reset_leaderboard()
             pyxel.quit()
@@ -128,6 +148,12 @@ class Controller():
         self._view.draw_information(
             self._model.elapsed_frames, self._model.fps, self._model.eggnemies_killed)
 
+        self._view.draw_egg_stats(
+            atk=self._model.egg.base_damage,
+            spd=self._model.egg.movement_speed,
+            eggxperience=self._model.egg.eggxperience,
+            eggxperience_required=self._model.egg.xp_threshold
+        )
         self._view.draw_leaderboard(self._model._leaderboard)
         # self._view.draw_hitbox(self._model._egg._damage_hitbox, pyxel.COLOR_YELLOW)
         self._view.draw_hitbox(self._model.egg.hitbox, pyxel.COLOR_WHITE)
@@ -140,6 +166,11 @@ class Controller():
 
         if self._model.is_game_over and self._model.egg.is_dead:
             self._view.draw_end(self._model.egg.hitbox, "YOU LOSE")
+
+        if self._model.in_enhancement_menu:
+            self._view.draw_enhancement_screen(self._model.enhancement_options, self._model.selected_enhancement_index)
+
+
 
     def _draw_eggmemy(self, eggnemy: Eggnemy):
         # self._view.draw_hitbox(eggnemy._damage_hitbox, pyxel.COLOR_YELLOW)
