@@ -1,7 +1,6 @@
 from egg_rally.model import Model
 from egg_rally.view import View
 from egg_rally.controller import Controller
-from egg_rally.project_types import InitEggConfig
 # from egg_rally.helpers import CartesianPoint
 from egg_rally.extract_json import json_handler_protocol
 
@@ -14,6 +13,10 @@ class EggRally:
         world_width: int = _settings['world_width']  # added world width
         world_height: int = _settings['world_height']  # and height
         fps: int = _settings['game_fps']
+        xp_threshold: float = _settings["eggxperience_threshold"]
+        egghancement_hp: float = _settings["egghancement_max_hp_increase"]
+        egghancement_atk: float = _settings["egghancement_attack_increase"]
+        egghancement_spd: float = _settings["egghancement_speed_increase"]
         # eggnemy_width: float = _settings['eggnemy_width']
         # eggnemy_height: float = _settings['eggnemy_height']
         # egg_health: float = _settings['egg_health']
@@ -32,7 +35,11 @@ class EggRally:
             screen_width=width,
             screen_height=height,
             world_width=world_width,
-            world_height=world_height)
+            world_height=world_height,
+            xp_threshold=xp_threshold,
+            egghancement_hp=egghancement_hp,
+            egghancement_atk=egghancement_atk,
+            egghancement_spd=egghancement_spd,)
         view = View(screen_width=width,
                     screen_height=height,
                     world_width=world_width,

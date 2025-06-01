@@ -2,7 +2,6 @@ import pyxel
 
 from egg_rally.project_types import (
     UpdateHandler, DrawHandler, Hitbox, EggInfo)
-from egg_rally.view_types import ObjectBox
 
 
 class View:
@@ -27,15 +26,6 @@ class View:
             y=hitbox.y,
             w=hitbox.width,
             h=hitbox.height,
-            col=color
-        )
-
-    def draw_object_box(self, object_box: ObjectBox, color: int) -> None:
-        pyxel.rect(
-            x=object_box.reference_point['x'],
-            y=object_box.reference_point['y'],
-            w=object_box.width,
-            h=object_box.height,
             col=color
         )
 

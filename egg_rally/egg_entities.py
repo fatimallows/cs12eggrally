@@ -5,7 +5,7 @@ from typing import Callable
 import itertools
 
 
-from egg_rally.project_types import (EggConfig, Hitbox, EggEntity, EggInfo)
+from egg_rally.project_types import (EggConfig, Hitbox, EggEntity)
 from egg_rally.helpers import (CartesianPoint, Vector)
 
 

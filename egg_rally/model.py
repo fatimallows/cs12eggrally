@@ -160,7 +160,7 @@ class Model():
             base_damage=EggSpecificData.base_damage,
             damage_hitbox_scale=EggSpecificData.damage_hitbox_scale,
             invincibility_frames=EggSpecificData.invincibility_frames,
-        ))
+        ), xp_threshold=self.xp_threshold)
 
     def _is_hitbox_in_bounds(self, hitbox: Hitbox) -> bool:
         # breakpoint()
