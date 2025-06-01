@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 from abc import ABC
@@ -39,6 +40,18 @@ class Hitbox(ABC):
         # breakpoint()
         return abs(point.x_hat) <= abs(center_to_corner_vector.x_hat) and (
             abs(point.y_hat) <= abs(center_to_corner_vector.y_hat))
+
+    def is_will_touch(self, move_vector: Vector, check_hitbox: Hitbox) -> tuple[bool, bool]:
+        check_x = self._coordinate.x + move_vector.x_hat
+        check_y = self._coordinate.y + move_vector.y_hat
+
+        return (
+            self._is_within(check_hitbox.left, check_x, check_hitbox.right),
+            self._is_within(check_hitbox.top, check_y, check_hitbox.bottom)
+        )
+
+    def _is_within(self, left: float, check: float, right: float) -> bool:
+        return left <= check and check <= right
 
     @property
     def width(self) -> float:

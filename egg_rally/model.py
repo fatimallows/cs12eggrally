@@ -225,7 +225,8 @@ class Model():
 
     def _move_all(self, move_vector: Vector) -> Callable:
         def _f(eggnemy: Eggnemy) -> None:
-            eggnemy.move(move_vector)
+            move = self._modified_individual_eggnemy_move(eggnemy, move_vector)
+            eggnemy.move(move)
 
         return _f
 
@@ -248,6 +249,26 @@ class Model():
         time: float = self._elapsed_frames / self.fps
         self._leaderboard.append(time)
         self._leaderboard.sort()
+
+    def _modified_individual_eggnemy_move(self, curr_eggnemy: Eggnemy, move_vector: Vector) -> Vector:
+        move_x = True
+        move_y = True
+        for key in self._eggnemy_list.eggnemy_list:
+            if curr_eggnemy is self._eggnemy_list.eggnemy_list[key]:
+                continue
+
+            is_will_touch = curr_eggnemy.hitbox.is_will_touch(
+                move_vector,
+                # what the fuck was I ON
+                self._eggnemy_list.eggnemy_list[key].eggnemy.hitbox
+            )
+            move_x = move_x and is_will_touch[0]
+            move_y = move_y and is_will_touch[1]
+
+        return Vector(
+            move_vector.x_hat if move_x else 0,
+            move_vector.y_hat if move_y else 0
+        )
 
     def update(self, keybinds: Keybinds) -> None:
         # game over check

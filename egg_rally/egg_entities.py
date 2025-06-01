@@ -169,6 +169,13 @@ class Eggnemy(Egg):
         self._hitbox.x += move_vector.x_hat
         self._hitbox.y += move_vector.y_hat
 
+    @property
+    def track_vector(self) -> Vector:
+        return self._get_tracking_vector(self)
+
+    def get_vector_to_hitbox(self, hitbox_target: Hitbox) -> Vector:
+        return super()._get_vector_to_hitbox(hitbox_target)
+
 
 @dataclass(frozen=True)
 class EggnemyTag(Enum):
