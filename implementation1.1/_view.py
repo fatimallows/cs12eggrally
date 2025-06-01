@@ -22,10 +22,13 @@ class View:
         pyxel.cls(0)
 
     def draw_hitbox(self, hitbox: Hitbox, color: int) -> None:
-        x = hitbox.x,
-        y = hitbox.y, 
-        pyxel.blt(x - 6.5, y - 5, 1, 0, 0, 16, 16)
-
+        pyxel.rect(
+            x=hitbox.x,
+            y=hitbox.y,
+            w=hitbox.width,
+            h=hitbox.height,
+            col=color
+        )
 
 
     def draw_health(self, egg_entity: EggInfo, hp_color: int) -> None:
