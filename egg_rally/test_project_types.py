@@ -1,6 +1,6 @@
 import pytest
-from _helpers import Vector, CartesianPoint
-from _project_types import InitEggConfig, Hitbox, EggConfig, Keybinds
+from egg_rally.helpers import Vector, CartesianPoint
+from egg_rally.project_types import InitEggConfig, Hitbox, EggConfig, Keybinds
 
 class TestVector:
     def test_vector_creation(self):
@@ -319,21 +319,21 @@ class TestEggConfig:
 
 class TestKeybinds:
     def test_keybinds_creation(self):
-        keybinds = Keybinds(up=True, down=False, left=True, right=False, attack=True)
+        keybinds = Keybinds(up=True, down=False, left=True, right=False, attack=True, restart=False, quit= False)
         assert keybinds.up is True
         assert keybinds.down is False
         assert keybinds.left is True
         assert keybinds.right is False
         assert keybinds.attack is True
 
-        all_false = Keybinds(up=False, down=False, left=False, right=False, attack=False)
+        all_false = Keybinds(up=False, down=False, left=False, right=False, attack=False, restart=False, quit= False)
         assert not all_false.up
         assert not all_false.down
         assert not all_false.left
         assert not all_false.right
         assert not all_false.attack
 
-        all_true = Keybinds(up=True, down=True, left=True, right=True, attack=True)
+        all_true = Keybinds(up=True, down=True, left=True, right=True, attack=True, restart=False, quit=False)
         assert all_true.up
         assert all_true.down
         assert all_true.left
@@ -341,17 +341,17 @@ class TestKeybinds:
         assert all_true.attack
 
     def test_keybinds_y_one_pressed(self):
-        assert Keybinds(up=True, down=False, left=False, right=False, attack=False).y_one_pressed is True
-        assert Keybinds(up=False, down=True, left=False, right=False, attack=False).y_one_pressed is True
-        assert Keybinds(up=True, down=True, left=False, right=False, attack=False).y_one_pressed is False
-        assert Keybinds(up=False, down=False, left=False, right=False, attack=False).y_one_pressed is False
-        assert Keybinds(up=True, down=True, left=True, right=True, attack=False).y_one_pressed is False
-        assert Keybinds(up=True, down=False, left=True, right=False, attack=False).y_one_pressed is True
-        assert Keybinds(up=True, down=False, left=True, right=True, attack=True).y_one_pressed is True
+        assert Keybinds(up=True, down=False, left=False, right=False, attack=False, restart=False, quit= False).y_one_pressed is True
+        assert Keybinds(up=False, down=True, left=False, right=False, attack=False, restart=False, quit= False).y_one_pressed is True
+        assert Keybinds(up=True, down=True, left=False, right=False, attack=False, restart=False, quit= False).y_one_pressed is False
+        assert Keybinds(up=False, down=False, left=False, right=False, attack=False, restart=False, quit= False).y_one_pressed is False
+        assert Keybinds(up=True, down=True, left=True, right=True, attack=False, restart=False, quit= False).y_one_pressed is False
+        assert Keybinds(up=True, down=False, left=True, right=False, attack=False, restart=False, quit= False).y_one_pressed is True
+        assert Keybinds(up=True, down=False, left=True, right=True, attack=True, restart=False, quit= False).y_one_pressed is True
     def test_keybinds_x_one_pressed(self):
         
-        assert Keybinds(up=False, down=False, left=True, right=False, attack=False).x_one_pressed is True
-        assert Keybinds(up=False, down=False, left=False, right=True, attack=False).x_one_pressed is True
-        assert Keybinds(up=False, down=False, left=True, right=True, attack=False).x_one_pressed is False
-        assert Keybinds(up=False, down=False, left=False, right=False, attack=False).x_one_pressed is False
+        assert Keybinds(up=False, down=False, left=True, right=False, attack=False, restart=False, quit= False).x_one_pressed is True
+        assert Keybinds(up=False, down=False, left=False, right=True, attack=False, restart=False, quit= False).x_one_pressed is True
+        assert Keybinds(up=False, down=False, left=True, right=True, attack=False, restart=False, quit= False).x_one_pressed is False
+        assert Keybinds(up=False, down=False, left=False, right=False, attack=False, restart=False, quit= False).x_one_pressed is False
     

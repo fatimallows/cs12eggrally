@@ -1,5 +1,5 @@
-from _egg_entities import Egg, EggEntity, Eggnemy, EggnemyList, EggnemyTag, EggnemyType, EggConfig, EggInfo
-from _project_types import Hitbox, Vector, CartesianPoint
+from egg_rally.egg_entities import Egg, EggEntity, Eggnemy, EggnemyList, EggnemyTag, EggnemyType, EggConfig, EggInfo
+from egg_rally.project_types import Hitbox, Vector, CartesianPoint
 class TestEgg:
     def test_egg_creation(self):
         hitbox = Hitbox(CartesianPoint(0,0), 3, 4)
